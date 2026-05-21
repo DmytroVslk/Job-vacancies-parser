@@ -13,6 +13,11 @@ lib/
 # === VS Code ===
 .vscode/
 
+# === Local environment / secrets ===
+.env
+.env.*
+!.env.example
+
 # === Generated view output ===
 src/main/resources/view/jobPostings.html
 src/main/resources/view/backup.html
