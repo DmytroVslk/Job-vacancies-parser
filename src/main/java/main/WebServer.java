@@ -20,8 +20,13 @@ public class WebServer {
     private static Model model;
 
     public static void main(String[] args) throws IOException {
+        AppConfig config = AppConfig.fromEnvironment();
+
         // Initialize model
-        model = new Model(new DummyView(), new Provider(new AdzunaStrategy()));
+        model = new Model(
+                new DummyView(),
+                new Provider(new AdzunaStrategy(config.getAdzunaAppId(), config.getAdzunaAppKey()))
+        );
         
         // Create HTTP server on port 8080
         HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);

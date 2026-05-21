@@ -45,6 +45,13 @@ src/main/java/
 
 **Prerequisites:** Java 21, Maven
 
+Create an Adzuna application and set your credentials as environment variables:
+
+```bash
+export ADZUNA_APP_ID="your_app_id"
+export ADZUNA_APP_KEY="your_app_key"
+```
+
 ```bash
 # Build
 mvn compile

@@ -16,11 +16,17 @@ import java.util.List;
 
 public class AdzunaStrategy implements Strategy {
 
-    private static final String APP_ID  = "9ad99d8e";
-    private static final String APP_KEY = "e1752b30bbcb0aae9179eb35b1b5f51e";
     private static final String API_BASE = "https://api.adzuna.com/v1/api/jobs/us/search/";
     private static final int MAX_PAGES = 5;
     private static final int PAGE_SIZE = 50;
+
+    private final String appId;
+    private final String appKey;
+
+    public AdzunaStrategy(String appId, String appKey) {
+        this.appId = appId;
+        this.appKey = appKey;
+    }
 
     @Override
     public List<JobPosting> getJobPostings(String location) {
@@ -38,14 +44,16 @@ public class AdzunaStrategy implements Strategy {
 
             for (int page = 1; page <= MAX_PAGES; page++) {
                 String urlString = API_BASE + page
-                        + "?app_id=" + encode(APP_ID)
-                        + "&app_key=" + encode(APP_KEY)
+                        + "?app_id=" + encode(appId)
+                        + "&app_key=" + encode(appKey)
                         + "&what=" + encodedSearchQuery
                         + "&where=" + encodedLocation
                         + "&results_per_page=" + PAGE_SIZE
                         + "&content-type=application/json";
 
-                System.out.println("Requesting page " + page + ": " + urlString);
+                System.out.println("Requesting Adzuna page " + page
+                        + " for location=" + location
+                        + ", position=" + searchQuery);
 
                 URL url = URI.create(urlString).toURL();
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
