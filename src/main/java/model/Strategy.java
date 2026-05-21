@@ -6,5 +6,8 @@ import java.util.List;
 
 public interface Strategy {
     List<JobPosting> getJobPostings(String searchString);
-}
 
+    default List<JobPosting> getJobPostings(String location, String position) {
+        return getJobPostings(location);
+    }
+}

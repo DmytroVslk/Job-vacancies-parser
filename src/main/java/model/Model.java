@@ -43,5 +43,12 @@ public class Model {
         }
         return vacancies;
     }
-}
 
+    public List<JobPosting> getJobPostings(String city, String position) {
+        List<JobPosting> vacancies = new ArrayList<>();
+        for (Provider provider : providers) {
+            vacancies.addAll(provider.getJavaJobPostings(city, position));
+        }
+        return vacancies;
+    }
+}

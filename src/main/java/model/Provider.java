@@ -15,6 +15,10 @@ public class Provider {
         return strategy.getJobPostings(searchString);
     }
 
+    public List<JobPosting> getJavaJobPostings(String location, String position) {
+        return strategy.getJobPostings(location, position);
+    }
+
     public void setStrategy(Strategy strategy) {
         this.strategy = strategy;
     }

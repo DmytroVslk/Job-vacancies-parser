@@ -88,7 +88,7 @@ public class WebServer {
 
             System.out.println("Search request: location=" + location + ", position=" + position);
 
-            List<JobPosting> jobs = model.getJobPostings(location);
+            List<JobPosting> jobs = model.getJobPostings(location, position);
             String jsonResponse = convertToJson(jobs);
 
             exchange.getResponseHeaders().set("Content-Type", "application/json");

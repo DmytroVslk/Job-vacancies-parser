@@ -10,6 +10,7 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,16 +24,23 @@ public class AdzunaStrategy implements Strategy {
 
     @Override
     public List<JobPosting> getJobPostings(String location) {
+        return getJobPostings(location, "");
+    }
+
+    @Override
+    public List<JobPosting> getJobPostings(String location, String position) {
         List<JobPosting> allVacancies = new ArrayList<>();
 
         try {
-            String encodedLocation = URLEncoder.encode(location, "UTF-8");
+            String searchQuery = buildSearchQuery(position);
+            String encodedLocation = encode(location);
+            String encodedSearchQuery = encode(searchQuery);
 
             for (int page = 1; page <= MAX_PAGES; page++) {
                 String urlString = API_BASE + page
-                        + "?app_id=" + APP_ID
-                        + "&app_key=" + APP_KEY
-                        + "&what=java+developer"
+                        + "?app_id=" + encode(APP_ID)
+                        + "&app_key=" + encode(APP_KEY)
+                        + "&what=" + encodedSearchQuery
                         + "&where=" + encodedLocation
                         + "&results_per_page=" + PAGE_SIZE
                         + "&content-type=application/json";
@@ -82,6 +90,17 @@ public class AdzunaStrategy implements Strategy {
 
         allVacancies.sort((a, b) -> titleScore(b.getTitle()) - titleScore(a.getTitle()));
         return allVacancies;
+    }
+
+    private String buildSearchQuery(String position) {
+        if (position == null || position.isBlank()) {
+            return "java developer";
+        }
+        return position.trim() + " java developer";
+    }
+
+    private String encode(String value) {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 
     private JobPosting extractJobPosting(JSONObject job) {
