@@ -13,7 +13,11 @@ public class Aggregator {
 
         Model model = new Model(
                 view,
-                new Provider(new AdzunaStrategy(config.getAdzunaAppId(), config.getAdzunaAppKey()))
+                new Provider(new AdzunaStrategy(
+                        config.getAdzunaAppId(),
+                        config.getAdzunaAppKey(),
+                        config.getAdzunaCountry()
+                ))
         );
         Controller controller = new Controller(model);
 

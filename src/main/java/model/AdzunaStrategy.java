@@ -16,16 +16,18 @@ import java.util.List;
 
 public class AdzunaStrategy implements Strategy {
 
-    private static final String API_BASE = "https://api.adzuna.com/v1/api/jobs/us/search/";
+    private static final String API_BASE = "https://api.adzuna.com/v1/api/jobs/";
     private static final int MAX_PAGES = 5;
     private static final int PAGE_SIZE = 50;
 
     private final String appId;
     private final String appKey;
+    private final String country;
 
-    public AdzunaStrategy(String appId, String appKey) {
+    public AdzunaStrategy(String appId, String appKey, String country) {
         this.appId = appId;
         this.appKey = appKey;
+        this.country = country;
     }
 
     @Override
@@ -43,7 +45,7 @@ public class AdzunaStrategy implements Strategy {
             String encodedSearchQuery = encode(searchQuery);
 
             for (int page = 1; page <= MAX_PAGES; page++) {
-                String urlString = API_BASE + page
+                String urlString = API_BASE + encode(country) + "/search/" + page
                         + "?app_id=" + encode(appId)
                         + "&app_key=" + encode(appKey)
                         + "&what=" + encodedSearchQuery

@@ -21,15 +21,21 @@ public class WebServer {
 
     public static void main(String[] args) throws IOException {
         AppConfig config = AppConfig.fromEnvironment();
+        int port = config.getServerPort();
+        String serverUrl = "http://localhost:" + port;
 
         // Initialize model
         model = new Model(
                 new DummyView(),
-                new Provider(new AdzunaStrategy(config.getAdzunaAppId(), config.getAdzunaAppKey()))
+                new Provider(new AdzunaStrategy(
+                        config.getAdzunaAppId(),
+                        config.getAdzunaAppKey(),
+                        config.getAdzunaCountry()
+                ))
         );
         
-        // Create HTTP server on port 8080
-        HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
+        // Create HTTP server
+        HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
         
         // Routes
         server.createContext("/", new StaticFileHandler());
@@ -38,12 +44,12 @@ public class WebServer {
         server.setExecutor(null);
         server.start();
         
-        System.out.println("🚀 Server started at http://localhost:8080");
+        System.out.println("🚀 Server started at " + serverUrl);
         System.out.println("📂 Serving files from: src/main/resources/view/");
         System.out.println("Press Ctrl+C to stop");
         
         // Automatically open browser
-        openBrowser("http://localhost:8080");
+        openBrowser(serverUrl);
     }
 
     static class StaticFileHandler implements HttpHandler{

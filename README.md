@@ -26,7 +26,7 @@ The project follows the **MVC** pattern with a **Strategy** pattern for data sou
 ```
 src/main/java/
 ├── main/
-│   ├── WebServer.java      — HTTP server (port 8080), routes: / and /search
+│   ├── WebServer.java      — HTTP server (default port 8080), routes: / and /search
 │   ├── Aggregator.java     — alternative console entry point
 │   └── Controller.java     — bridges View and Model
 ├── model/
@@ -45,12 +45,22 @@ src/main/java/
 
 **Prerequisites:** Java 21, Maven
 
-Create an Adzuna application and set your credentials as environment variables:
+Create an Adzuna application, copy the example config, and fill in your real credentials:
 
 ```bash
-export ADZUNA_APP_ID="your_app_id"
-export ADZUNA_APP_KEY="your_app_key"
+cp .env.example .env
 ```
+
+Then edit `.env`:
+
+```text
+ADZUNA_APP_ID=your_real_app_id
+ADZUNA_APP_KEY=your_real_app_key
+SERVER_PORT=8080
+ADZUNA_COUNTRY=us
+```
+
+Real environment variables can still override values from `.env` when needed.
 
 ```bash
 # Build
@@ -60,7 +70,7 @@ mvn compile
 mvn exec:java -Dexec.mainClass=main.WebServer
 ```
 
-The server starts at `http://localhost:8080` and opens in your default browser automatically.
+The server starts at `http://localhost:8080` by default and opens in your default browser automatically.
 
 ## Search API
 
