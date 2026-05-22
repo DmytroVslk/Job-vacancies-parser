@@ -4,7 +4,7 @@ import vo.JobPosting;
 
 import java.util.List;
 
-public interface Strategy {
+public interface JobProvider {
     List<JobPosting> getJobPostings(String searchString);
 
     default List<JobPosting> getJobPostings(String location, String position) {

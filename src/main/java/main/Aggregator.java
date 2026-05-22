@@ -1,8 +1,8 @@
 package main;
 
-import model.AdzunaStrategy;
+import model.AdzunaJobProvider;
+import model.JobProvider;
 import model.Model;
-import model.Provider;
 import view.HtmlView;
 
 public class Aggregator {
@@ -11,14 +11,12 @@ public class Aggregator {
         AppConfig config = AppConfig.fromEnvironment();
         HtmlView view = new HtmlView();
 
-        Model model = new Model(
-                view,
-                new Provider(new AdzunaStrategy(
-                        config.getAdzunaAppId(),
-                        config.getAdzunaAppKey(),
-                        config.getAdzunaCountry()
-                ))
+        JobProvider adzunaProvider = new AdzunaJobProvider(
+                config.getAdzunaAppId(),
+                config.getAdzunaAppKey(),
+                config.getAdzunaCountry()
         );
+        Model model = new Model(view, adzunaProvider);
         Controller controller = new Controller(model);
 
         view.setController(controller);

@@ -3,8 +3,7 @@ package main;
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
-import model.AdzunaStrategy;
-import model.Provider;
+import model.AdzunaJobProvider;
 import service.JobSearchService;
 import vo.JobPosting;
 
@@ -24,11 +23,11 @@ public class WebServer {
         String serverUrl = "http://localhost:" + port;
 
         JobSearchService jobSearchService = new JobSearchService(
-                new Provider(new AdzunaStrategy(
+                new AdzunaJobProvider(
                         config.getAdzunaAppId(),
                         config.getAdzunaAppKey(),
                         config.getAdzunaCountry()
-                ))
+                )
         );
         
         // Create HTTP server

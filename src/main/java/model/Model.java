@@ -8,9 +8,9 @@ import java.util.List;
 
 public class Model {
     private View view;
-    private Provider[] providers;
+    private JobProvider[] providers;
 
-    public Model(View view, Provider... providers) {
+    public Model(View view, JobProvider... providers) {
         if (view == null || providers == null || providers.length == 0) {
             throw new IllegalArgumentException();
         }
@@ -20,7 +20,7 @@ public class Model {
 
     public void selectCity(String city) {
         List<JobPosting> vacancies = new ArrayList<>();
-        for (Provider provider : providers) {
+        for (JobProvider provider : providers) {
             vacancies.addAll(provider.getJobPostings(city));
         }
         view.update(vacancies);
@@ -29,7 +29,7 @@ public class Model {
     public void selectCities(String[] cities) {
         List<JobPosting> allVacancies = new ArrayList<>();
         for (String city : cities) {
-            for (Provider provider : providers) {
+            for (JobProvider provider : providers) {
                 allVacancies.addAll(provider.getJobPostings(city));
             }
         }
@@ -38,7 +38,7 @@ public class Model {
 
     public List<JobPosting> getJobPostings(String city) {
         List<JobPosting> vacancies = new ArrayList<>();
-        for (Provider provider : providers) {
+        for (JobProvider provider : providers) {
             vacancies.addAll(provider.getJobPostings(city));
         }
         return vacancies;
@@ -46,7 +46,7 @@ public class Model {
 
     public List<JobPosting> getJobPostings(String city, String position) {
         List<JobPosting> vacancies = new ArrayList<>();
-        for (Provider provider : providers) {
+        for (JobProvider provider : providers) {
             vacancies.addAll(provider.getJobPostings(city, position));
         }
         return vacancies;

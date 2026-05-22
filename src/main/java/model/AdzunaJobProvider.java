@@ -14,7 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AdzunaStrategy implements Strategy {
+public class AdzunaJobProvider implements JobProvider {
 
     private static final String API_BASE = "https://api.adzuna.com/v1/api/jobs/";
     private static final int MAX_PAGES = 5;
@@ -24,7 +24,7 @@ public class AdzunaStrategy implements Strategy {
     private final String appKey;
     private final String country;
 
-    public AdzunaStrategy(String appId, String appKey, String country) {
+    public AdzunaJobProvider(String appId, String appKey, String country) {
         this.appId = appId;
         this.appKey = appKey;
         this.country = country;

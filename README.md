@@ -14,14 +14,14 @@ A web application that aggregates developer job postings from the [Adzuna](https
 ## How It Works
 
 1. The user enters a location in the web UI and submits a search.
-2. The browser sends a `GET /search?location=<city>` request to the local server.
-3. `AdzunaStrategy` queries the Adzuna Jobs API with `what=<position>&where=<city>`.
+2. The browser sends a `GET /search?location=<city>&position=<position>` request to the local server.
+3. `AdzunaJobProvider` queries the Adzuna Jobs API with `what=<position>&where=<city>`.
 4. `JobSearchService` sorts results by relevance score.
 5. The server returns JSON; the UI renders it as a table.
 
 ## Architecture
 
-The project follows the **MVC** pattern with a **Strategy** pattern for data sources.
+The project follows the **MVC** pattern with a simple `JobProvider` interface for data sources.
 
 ```
 src/main/java/
@@ -32,10 +32,9 @@ src/main/java/
 ├── service/
 │   └── JobSearchService.java — search business logic
 ├── model/
-│   ├── AdzunaStrategy.java — Adzuna API integration and response parsing
-│   ├── Model.java          — aggregates results from one or more Providers
-│   ├── Provider.java       — wraps a Strategy, supports runtime strategy swap
-│   └── Strategy.java       — interface for job-fetching strategies
+│   ├── AdzunaJobProvider.java — Adzuna API integration and response parsing
+│   ├── JobProvider.java       — interface for job providers
+│   └── Model.java             — aggregates results from one or more job providers
 ├── view/
 │   ├── HtmlView.java       — console/HTML view implementation
 │   └── View.java           — View interface
@@ -77,7 +76,7 @@ The server starts at `http://localhost:8080` by default and opens in your defaul
 ## Search API
 
 ```
-GET /search?location={city}
+GET /search?location={city}&position={language_or_job_title}
 ```
 
 | Parameter  | Description                          | Example       |

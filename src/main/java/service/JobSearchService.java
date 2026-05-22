@@ -1,6 +1,6 @@
 package service;
 
-import model.Provider;
+import model.JobProvider;
 import vo.JobPosting;
 
 import java.util.ArrayList;
@@ -8,9 +8,9 @@ import java.util.List;
 
 public class JobSearchService {
 
-    private final Provider[] providers;
+    private final JobProvider[] providers;
 
-    public JobSearchService(Provider... providers) {
+    public JobSearchService(JobProvider... providers) {
         if (providers == null || providers.length == 0) {
             throw new IllegalArgumentException("At least one job provider is required.");
         }
@@ -21,7 +21,7 @@ public class JobSearchService {
     public List<JobPosting> searchJobs(String location, String position) {
         String searchQuery = buildSearchQuery(position);
         List<JobPosting> jobs = new ArrayList<>();
-        for (Provider provider : providers) {
+        for (JobProvider provider : providers) {
             for (JobPosting job : provider.getJobPostings(location, position)) {
                 if (hasTitle(job)) {
                     jobs.add(job);
