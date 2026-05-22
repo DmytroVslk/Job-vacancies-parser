@@ -21,7 +21,7 @@ public class Model {
     public void selectCity(String city) {
         List<JobPosting> vacancies = new ArrayList<>();
         for (Provider provider : providers) {
-            vacancies.addAll(provider.getJavaJobPostings(city));
+            vacancies.addAll(provider.getJobPostings(city));
         }
         view.update(vacancies);
     }
@@ -30,7 +30,7 @@ public class Model {
         List<JobPosting> allVacancies = new ArrayList<>();
         for (String city : cities) {
             for (Provider provider : providers) {
-                allVacancies.addAll(provider.getJavaJobPostings(city));
+                allVacancies.addAll(provider.getJobPostings(city));
             }
         }
         view.update(allVacancies);
@@ -39,7 +39,7 @@ public class Model {
     public List<JobPosting> getJobPostings(String city) {
         List<JobPosting> vacancies = new ArrayList<>();
         for (Provider provider : providers) {
-            vacancies.addAll(provider.getJavaJobPostings(city));
+            vacancies.addAll(provider.getJobPostings(city));
         }
         return vacancies;
     }
@@ -47,7 +47,7 @@ public class Model {
     public List<JobPosting> getJobPostings(String city, String position) {
         List<JobPosting> vacancies = new ArrayList<>();
         for (Provider provider : providers) {
-            vacancies.addAll(provider.getJavaJobPostings(city, position));
+            vacancies.addAll(provider.getJobPostings(city, position));
         }
         return vacancies;
     }

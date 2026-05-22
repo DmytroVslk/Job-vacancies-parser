@@ -4,8 +4,8 @@ import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
 import model.AdzunaStrategy;
-import model.Model;
 import model.Provider;
+import service.JobSearchService;
 import vo.JobPosting;
 
 import java.io.*;
@@ -17,16 +17,13 @@ import java.util.List;
 import java.util.Map;
 
 public class WebServer {
-    private static Model model;
 
     public static void main(String[] args) throws IOException {
         AppConfig config = AppConfig.fromEnvironment();
         int port = config.getServerPort();
         String serverUrl = "http://localhost:" + port;
 
-        // Initialize model
-        model = new Model(
-                new DummyView(),
+        JobSearchService jobSearchService = new JobSearchService(
                 new Provider(new AdzunaStrategy(
                         config.getAdzunaAppId(),
                         config.getAdzunaAppKey(),
@@ -39,7 +36,7 @@ public class WebServer {
         
         // Routes
         server.createContext("/", new StaticFileHandler());
-        server.createContext("/search", new SearchHandler());
+        server.createContext("/search", new SearchHandler(jobSearchService));
         
         server.setExecutor(null);
         server.start();
@@ -91,6 +88,12 @@ public class WebServer {
     }
 
     public static class SearchHandler implements HttpHandler{
+        private final JobSearchService jobSearchService;
+
+        public SearchHandler(JobSearchService jobSearchService) {
+            this.jobSearchService = jobSearchService;
+        }
+
         public void handle(HttpExchange exchange) throws IOException{
             Map<String, String> params = parseQuery(exchange.getRequestURI().getQuery());
 
@@ -99,7 +102,7 @@ public class WebServer {
 
             System.out.println("Search request: location=" + location + ", position=" + position);
 
-            List<JobPosting> jobs = model.getJobPostings(location, position);
+            List<JobPosting> jobs = jobSearchService.searchJobs(location, position);
             String jsonResponse = convertToJson(jobs);
 
             exchange.getResponseHeaders().set("Content-Type", "application/json");
@@ -117,7 +120,7 @@ public class WebServer {
             if(query == null) return result;
             
             for(String param : query.split("&")){
-                String[] pair = param.split("=");
+                String[] pair = param.split("=", 2);
                 if(pair.length > 1){
                     try{
                         result.put(
@@ -155,14 +158,6 @@ public class WebServer {
                         .replace("\"", "\\\"")
                         .replace("\n", "\\n");
         }
-    }
-
-    static class DummyView implements view.View {
-        @Override
-        public void update(List<JobPosting> vacancies) {}
-        
-        @Override
-        public void setController(Controller controller) {}
     }
     
     private static void openBrowser(String url) {

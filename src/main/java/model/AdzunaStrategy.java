@@ -98,7 +98,6 @@ public class AdzunaStrategy implements Strategy {
             e.printStackTrace();
         }
 
-        allVacancies.sort((a, b) -> titleScore(b.getTitle()) - titleScore(a.getTitle()));
         return allVacancies;
     }
 
@@ -106,7 +105,7 @@ public class AdzunaStrategy implements Strategy {
         if (position == null || position.isBlank()) {
             return "java developer";
         }
-        return position.trim() + " java developer";
+        return position.trim();
     }
 
     private String encode(String value) {
@@ -115,10 +114,6 @@ public class AdzunaStrategy implements Strategy {
 
     private JobPosting extractJobPosting(JSONObject job) {
         String title = job.optString("title", "");
-
-        if (!title.toLowerCase().matches(".*\\bjava\\b.*")) {
-            return null;
-        }
 
         JobPosting vacancy = new JobPosting();
         vacancy.setTitle(title);
@@ -143,19 +138,5 @@ public class AdzunaStrategy implements Strategy {
         vacancy.setCity(city);
 
         return vacancy;
-    }
-
-    private int titleScore(String title) {
-        String t = title.toLowerCase();
-        int score = 0;
-        if (t.contains("java"))             score += 1;
-        if (t.contains("java developer"))   score += 4;
-        if (t.contains("java engineer"))    score += 4;
-        if (t.contains("java backend"))     score += 3;
-        if (t.contains("java software"))    score += 3;
-        if (t.contains("java full"))        score += 2;
-        if (t.contains("junior"))           score += 1;
-        if (t.contains("entry level"))      score += 1;
-        return score;
     }
 }

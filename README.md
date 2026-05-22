@@ -1,11 +1,11 @@
 # Java Job Aggregator
 
-A web application that aggregates Java developer job postings from the [Adzuna](https://www.adzuna.com/) jobs API and displays them in a clean browser interface. It features a built-in HTTP server, a REST-like search endpoint, and relevance-based result sorting.
+A web application that aggregates developer job postings from the [Adzuna](https://www.adzuna.com/) jobs API and displays them in a clean browser interface. It features a built-in HTTP server, a REST-like search endpoint, and relevance-based result sorting.
 
 ## Features
 
-- Search Java developer jobs by city or region (e.g. `Dallas`, `New York`, `Remote`)
-- Results filtered to Java-specific titles using whole-word matching (`\bjava\b`)
+- Search developer jobs by city or region (e.g. `Dallas`, `New York`, `Remote`)
+- Search different programming languages and job titles, such as Java, Python, JavaScript, frontend, backend, DevOps, and data engineering
 - Relevance scoring — titles like `Java Developer` and `Java Engineer` appear first
 - Up to 250 results fetched per search (5 pages × 50 results)
 - Clean web UI with results rendered in a sortable table
@@ -15,8 +15,8 @@ A web application that aggregates Java developer job postings from the [Adzuna](
 
 1. The user enters a location in the web UI and submits a search.
 2. The browser sends a `GET /search?location=<city>` request to the local server.
-3. `AdzunaStrategy` queries the Adzuna Jobs API with `what=java+developer&where=<city>`.
-4. Results are filtered (only titles containing the word *java*) and sorted by relevance score.
+3. `AdzunaStrategy` queries the Adzuna Jobs API with `what=<position>&where=<city>`.
+4. `JobSearchService` sorts results by relevance score.
 5. The server returns JSON; the UI renders it as a table.
 
 ## Architecture
@@ -29,8 +29,10 @@ src/main/java/
 │   ├── WebServer.java      — HTTP server (default port 8080), routes: / and /search
 │   ├── Aggregator.java     — alternative console entry point
 │   └── Controller.java     — bridges View and Model
+├── service/
+│   └── JobSearchService.java — search business logic
 ├── model/
-│   ├── AdzunaStrategy.java — Adzuna API integration, filtering, scoring
+│   ├── AdzunaStrategy.java — Adzuna API integration and response parsing
 │   ├── Model.java          — aggregates results from one or more Providers
 │   ├── Provider.java       — wraps a Strategy, supports runtime strategy swap
 │   └── Strategy.java       — interface for job-fetching strategies
@@ -81,6 +83,7 @@ GET /search?location={city}
 | Parameter  | Description                          | Example       |
 |------------|--------------------------------------|---------------|
 | `location` | City or region to search jobs in     | `Dallas`      |
+| `position` | Optional language or job title       | `python developer` |
 
 Returns a JSON array of job objects:
 
