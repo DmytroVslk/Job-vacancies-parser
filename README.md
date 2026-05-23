@@ -27,21 +27,17 @@ The project follows the **MVC** pattern with a simple `JobProvider` interface fo
 src/main/java/
 ├── main/
 │   ├── WebServer.java      — HTTP server (default port 8080), routes: / and /search
-│   ├── Aggregator.java     — alternative console entry point
-│   └── Controller.java     — bridges View and Model
+│   └── AppConfig.java      — reads .env and environment configuration
 ├── service/
 │   └── JobSearchService.java — search business logic
 ├── model/
 │   ├── AdzunaJobProvider.java — Adzuna API integration and response parsing
 │   ├── JobProvider.java       — interface for job providers
-│   └── Model.java             — aggregates results from one or more job providers
+│   └── ProviderException.java — provider error type for safe API errors
 ├── response/
 │   ├── ErrorResponse.java     — standard error JSON returned by API endpoints
 │   ├── JobSearchResponse.java — standard success JSON returned by /search
 │   └── JobSearchResult.java   — job item shape inside /search responses
-├── view/
-│   ├── HtmlView.java       — console/HTML view implementation
-│   └── View.java           — View interface
 └── vo/
     └── JobPosting.java     — job data object (title, company, city, url, website)
 ```
@@ -122,6 +118,5 @@ Error responses use the same standard shape:
 
 | Library        | Purpose                        |
 |----------------|-------------------------------|
-| `org.json`     | JSON parsing of API responses |
+| `org.json`     | JSON parsing of Adzuna API responses |
 | `jackson-databind` | JSON serialization of backend API responses |
-| `org.jsoup`    | HTML parsing (reserved)       |

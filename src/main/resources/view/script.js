@@ -8,7 +8,7 @@ async function searchJobs() {
     const jobCount = document.getElementById('jobCount');
     
     // Показати статус завантаження
-    statusDiv.textContent = `🔄 Searching for jobs in ${location}...`;
+    statusDiv.textContent = `Searching for jobs in ${location}...`;
     statusDiv.className = 'status loading';
     searchBtn.disabled = true;
     
@@ -35,14 +35,14 @@ async function searchJobs() {
             tableBody.innerHTML = `
                 <tr>
                     <td colspan="4" class="empty-state">
-                        <p>😔 No jobs found. Try different filters.</p>
+                        <p>No jobs found. Try different filters.</p>
                     </td>
                 </tr>
             `;
             statusDiv.textContent = 'No jobs found. Try adjusting your search.';
             statusDiv.className = 'status';
         } else {
-            // Додаємо кожну вакансію в таблицю
+            // Add each job to the table
             jobs.forEach(job => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -58,7 +58,7 @@ async function searchJobs() {
                 tableBody.appendChild(row);
             });
             
-            statusDiv.textContent = `✅ Found ${count} jobs in ${location}`;
+            statusDiv.textContent = `Found ${count} jobs in ${location}`;
             statusDiv.className = 'status success';
         }
         
@@ -67,7 +67,7 @@ async function searchJobs() {
     } catch (error) {
         console.error('Error:', error);
         const errorMessage = error.message || 'Error loading jobs. Please try again.';
-        statusDiv.textContent = `❌ ${errorMessage}`;
+        statusDiv.textContent = `Error: ${errorMessage}`;
         statusDiv.className = 'status';
         tableBody.innerHTML = `
             <tr>
@@ -90,5 +90,5 @@ function escapeHtml(text) {
 
 // Автоматичний пошук при завантаженні сторінки (опціонально)
 window.addEventListener('load', () => {
-    console.log('🚀 Job Aggregator loaded');
+    console.log('Job Aggregator loaded');
 });
