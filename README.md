@@ -36,7 +36,9 @@ src/main/java/
 │   ├── JobProvider.java       — interface for job providers
 │   └── Model.java             — aggregates results from one or more job providers
 ├── response/
-│   └── JobSearchResult.java   — JSON shape returned by /search
+│   ├── ErrorResponse.java     — standard error JSON returned by API endpoints
+│   ├── JobSearchResponse.java — standard success JSON returned by /search
+│   └── JobSearchResult.java   — job item shape inside /search responses
 ├── view/
 │   ├── HtmlView.java       — console/HTML view implementation
 │   └── View.java           — View interface
@@ -86,18 +88,34 @@ GET /search?location={city}&position={language_or_job_title}
 | `location` | City or region to search jobs in     | `Dallas`      |
 | `position` | Optional language or job title       | `python developer` |
 
-Returns a JSON array of job objects:
+Returns a standard JSON response object:
 
 ```json
-[
-  {
-    "title": "Java Developer",
-    "company": "Acme Corp",
-    "location": "Dallas",
-    "url": "https://...",
-    "website": "adzuna.com"
-  }
-]
+{
+  "success": true,
+  "count": 1,
+  "jobs": [
+    {
+      "title": "Java Developer",
+      "company": "Acme Corp",
+      "location": "Dallas",
+      "url": "https://...",
+      "website": "adzuna.com"
+    }
+  ],
+  "warnings": []
+}
+```
+
+Frontend code should read jobs from `response.jobs`.
+
+Error responses use the same standard shape:
+
+```json
+{
+  "success": false,
+  "message": "Location cannot be empty."
+}
 ```
 
 ## Dependencies
@@ -105,4 +123,5 @@ Returns a JSON array of job objects:
 | Library        | Purpose                        |
 |----------------|-------------------------------|
 | `org.json`     | JSON parsing of API responses |
+| `jackson-databind` | JSON serialization of backend API responses |
 | `org.jsoup`    | HTML parsing (reserved)       |

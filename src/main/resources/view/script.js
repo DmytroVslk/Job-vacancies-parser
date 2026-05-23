@@ -19,11 +19,14 @@ async function searchJobs() {
         // Викликаємо API сервера
         const response = await fetch(`/search?location=${encodeURIComponent(location)}&position=${encodeURIComponent(position)}`);
         
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
+        const data = await response.json();
+
+        if (!response.ok || data.success === false) {
+            throw new Error(data.message || 'Network response was not ok');
         }
-        
-        const jobs = await response.json();
+
+        const jobs = data.jobs || [];
+        const count = data.count ?? jobs.length;
         
         // Очищаємо таблицю
         tableBody.innerHTML = '';
@@ -55,11 +58,11 @@ async function searchJobs() {
                 tableBody.appendChild(row);
             });
             
-            statusDiv.textContent = `✅ Found ${jobs.length} jobs in ${location}`;
+            statusDiv.textContent = `✅ Found ${count} jobs in ${location}`;
             statusDiv.className = 'status success';
         }
         
-        jobCount.textContent = jobs.length;
+        jobCount.textContent = count;
         
     } catch (error) {
         console.error('Error:', error);

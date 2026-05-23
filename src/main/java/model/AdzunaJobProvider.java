@@ -94,8 +94,7 @@ public class AdzunaJobProvider implements JobProvider {
                 }
             }
         } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
-            e.printStackTrace();
+            System.out.println("Adzuna provider error: " + e.getClass().getSimpleName());
         }
 
         return allVacancies;

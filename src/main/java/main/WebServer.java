@@ -5,6 +5,8 @@ import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
 import model.AdzunaJobProvider;
+import response.ErrorResponse;
+import response.JobSearchResponse;
 import response.JobSearchResult;
 import service.JobSearchService;
 import vo.JobPosting;
@@ -103,18 +105,21 @@ public class WebServer {
             String location = params.getOrDefault("location", "Dallas, TX");
             String position = params.getOrDefault("position", "");
 
+            if (location.isBlank()) {
+                sendJson(exchange, 400, new ErrorResponse("Location cannot be empty."));
+                return;
+            }
+
             System.out.println("Search request: location=" + location + ", position=" + position);
 
-            List<JobPosting> jobs = jobSearchService.searchJobs(location, position);
-            byte[] jsonResponse = objectMapper.writeValueAsBytes(toResponse(jobs));
-
-            exchange.getResponseHeaders().set("Content-Type", "application/json");
-            exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
-            exchange.sendResponseHeaders(200, jsonResponse.length);
-
-            OutputStream os = exchange.getResponseBody();
-            os.write(jsonResponse);
-            os.close();
+            try {
+                List<JobPosting> jobs = jobSearchService.searchJobs(location, position);
+                List<JobSearchResult> jobResults = toResponse(jobs);
+                sendJson(exchange, 200, new JobSearchResponse(jobResults));
+            } catch (Exception e) {
+                System.out.println("Unexpected search error: " + e.getClass().getSimpleName());
+                sendJson(exchange, 500, new ErrorResponse("Unable to search jobs right now. Please try again later."));
+            }
         }
         
 
@@ -131,7 +136,7 @@ public class WebServer {
                             URLDecoder.decode(pair[1], "UTF-8")
                         );
                     } catch(UnsupportedEncodingException e){
-                        e.printStackTrace();
+                        System.out.println("Unable to decode query parameter.");
                     }
                 }
             }
@@ -144,6 +149,18 @@ public class WebServer {
                 response.add(JobSearchResult.from(job));
             }
             return response;
+        }
+
+        private void sendJson(HttpExchange exchange, int statusCode, Object response) throws IOException {
+            byte[] jsonResponse = objectMapper.writeValueAsBytes(response);
+
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
+            exchange.sendResponseHeaders(statusCode, jsonResponse.length);
+
+            OutputStream os = exchange.getResponseBody();
+            os.write(jsonResponse);
+            os.close();
         }
     }
     
