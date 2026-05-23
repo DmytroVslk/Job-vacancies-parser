@@ -1,9 +1,11 @@
 package main;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
 import model.AdzunaJobProvider;
+import response.JobSearchResult;
 import service.JobSearchService;
 import vo.JobPosting;
 
@@ -11,6 +13,7 @@ import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.URLDecoder;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -88,6 +91,7 @@ public class WebServer {
 
     public static class SearchHandler implements HttpHandler{
         private final JobSearchService jobSearchService;
+        private final ObjectMapper objectMapper = new ObjectMapper();
 
         public SearchHandler(JobSearchService jobSearchService) {
             this.jobSearchService = jobSearchService;
@@ -102,14 +106,14 @@ public class WebServer {
             System.out.println("Search request: location=" + location + ", position=" + position);
 
             List<JobPosting> jobs = jobSearchService.searchJobs(location, position);
-            String jsonResponse = convertToJson(jobs);
+            byte[] jsonResponse = objectMapper.writeValueAsBytes(toResponse(jobs));
 
             exchange.getResponseHeaders().set("Content-Type", "application/json");
             exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
-            exchange.sendResponseHeaders(200, jsonResponse.getBytes().length);
+            exchange.sendResponseHeaders(200, jsonResponse.length);
 
             OutputStream os = exchange.getResponseBody();
-            os.write(jsonResponse.getBytes());
+            os.write(jsonResponse);
             os.close();
         }
         
@@ -133,29 +137,13 @@ public class WebServer {
             }
             return result;
         }
-        
-        private String convertToJson(List<JobPosting> jobs) {
-                StringBuilder json = new StringBuilder("[");
-                for (int i = 0; i < jobs.size(); i++) {
-                    JobPosting job = jobs.get(i);
-                    json.append("{");
-                    json.append("\"title\":\"").append(escapeJson(job.getTitle())).append("\",");
-                    json.append("\"company\":\"").append(escapeJson(job.getCompanyName())).append("\",");
-                    json.append("\"location\":\"").append(escapeJson(job.getCity())).append("\",");
-                    json.append("\"url\":\"").append(escapeJson(job.getUrl())).append("\",");
-                    json.append("\"website\":\"").append(escapeJson(job.getWebsiteName())).append("\"");
-                    json.append("}");
-                    if (i < jobs.size() - 1) json.append(",");
-                }
-                json.append("]");
-                return json.toString();
-        }
 
-        private String escapeJson(String str) {
-            if (str == null) return "";
-            return str.replace("\\", "\\\\")
-                        .replace("\"", "\\\"")
-                        .replace("\n", "\\n");
+        private List<JobSearchResult> toResponse(List<JobPosting> jobs) {
+            List<JobSearchResult> response = new ArrayList<>();
+            for (JobPosting job : jobs) {
+                response.add(JobSearchResult.from(job));
+            }
+            return response;
         }
     }
     

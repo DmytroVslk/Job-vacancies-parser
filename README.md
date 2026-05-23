@@ -17,7 +17,7 @@ A web application that aggregates developer job postings from the [Adzuna](https
 2. The browser sends a `GET /search?location=<city>&position=<position>` request to the local server.
 3. `AdzunaJobProvider` queries the Adzuna Jobs API with `what=<position>&where=<city>`.
 4. `JobSearchService` sorts results by relevance score.
-5. The server returns JSON; the UI renders it as a table.
+5. Jackson serializes response objects to JSON; the UI renders it as a table.
 
 ## Architecture
 
@@ -35,6 +35,8 @@ src/main/java/
 │   ├── AdzunaJobProvider.java — Adzuna API integration and response parsing
 │   ├── JobProvider.java       — interface for job providers
 │   └── Model.java             — aggregates results from one or more job providers
+├── response/
+│   └── JobSearchResult.java   — JSON shape returned by /search
 ├── view/
 │   ├── HtmlView.java       — console/HTML view implementation
 │   └── View.java           — View interface
