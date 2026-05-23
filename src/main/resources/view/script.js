@@ -66,12 +66,13 @@ async function searchJobs() {
         
     } catch (error) {
         console.error('Error:', error);
-        statusDiv.textContent = '❌ Error loading jobs. Please try again.';
+        const errorMessage = error.message || 'Error loading jobs. Please try again.';
+        statusDiv.textContent = `❌ ${errorMessage}`;
         statusDiv.className = 'status';
         tableBody.innerHTML = `
             <tr>
                 <td colspan="4" style="text-align: center; color: #dc3545;">
-                    Error: ${error.message}
+                    Error: ${escapeHtml(errorMessage)}
                 </td>
             </tr>
         `;

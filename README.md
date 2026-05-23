@@ -114,7 +114,7 @@ Error responses use the same standard shape:
 ```json
 {
   "success": false,
-  "message": "Location cannot be empty."
+  "message": "Location is required."
 }
 ```
 

@@ -5,6 +5,7 @@ import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
 import model.AdzunaJobProvider;
+import model.ProviderException;
 import response.ErrorResponse;
 import response.JobSearchResponse;
 import response.JobSearchResult;
@@ -102,23 +103,28 @@ public class WebServer {
         public void handle(HttpExchange exchange) throws IOException{
             Map<String, String> params = parseQuery(exchange.getRequestURI().getQuery());
 
-            String location = params.getOrDefault("location", "Dallas, TX");
+            String location = params.get("location");
             String position = params.getOrDefault("position", "");
 
-            if (location.isBlank()) {
-                sendJson(exchange, 400, new ErrorResponse("Location cannot be empty."));
+            if (location == null || location.isBlank()) {
+                sendJson(exchange, 400, new ErrorResponse("Location is required."));
                 return;
             }
 
+            location = location.trim();
+            position = position.trim();
             System.out.println("Search request: location=" + location + ", position=" + position);
 
             try {
                 List<JobPosting> jobs = jobSearchService.searchJobs(location, position);
                 List<JobSearchResult> jobResults = toResponse(jobs);
                 sendJson(exchange, 200, new JobSearchResponse(jobResults));
+            } catch (ProviderException e) {
+                System.out.println("Job provider error: " + e.getMessage());
+                sendJson(exchange, 500, new ErrorResponse("Unable to fetch jobs right now. Please try again later."));
             } catch (Exception e) {
                 System.out.println("Unexpected search error: " + e.getClass().getSimpleName());
-                sendJson(exchange, 500, new ErrorResponse("Unable to search jobs right now. Please try again later."));
+                sendJson(exchange, 500, new ErrorResponse("Unable to fetch jobs right now. Please try again later."));
             }
         }
         
@@ -158,9 +164,9 @@ public class WebServer {
             exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
             exchange.sendResponseHeaders(statusCode, jsonResponse.length);
 
-            OutputStream os = exchange.getResponseBody();
-            os.write(jsonResponse);
-            os.close();
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(jsonResponse);
+            }
         }
     }
     
