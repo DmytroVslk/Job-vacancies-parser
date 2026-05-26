@@ -23,6 +23,7 @@ public class AdzunaJobProvider implements JobProvider {
     private static final int MAX_PAGES = 5;
     private static final int PAGE_SIZE = 50;
     private static final int TIMEOUT_MS = 10000;
+    private static final String IT_CATEGORY = "it-jobs";
 
     private final String appId;
     private final String appKey;
@@ -44,18 +45,21 @@ public class AdzunaJobProvider implements JobProvider {
         List<JobPosting> allVacancies = new ArrayList<>();
 
         try {
-            String searchQuery = buildSearchQuery(position);
+            String searchQuery = cleanPosition(position);
             String encodedLocation = encode(location);
-            String encodedSearchQuery = encode(searchQuery);
 
             for (int page = 1; page <= MAX_PAGES; page++) {
                 String urlString = API_BASE + encode(country) + "/search/" + page
                         + "?app_id=" + encode(appId)
                         + "&app_key=" + encode(appKey)
-                        + "&what=" + encodedSearchQuery
                         + "&where=" + encodedLocation
                         + "&results_per_page=" + PAGE_SIZE
                         + "&content-type=application/json";
+                if (!searchQuery.isEmpty()) {
+                    urlString += "&what=" + encode(searchQuery);
+                } else {
+                    urlString += "&category=" + encode(IT_CATEGORY);
+                }
 
                 System.out.println("Requesting Adzuna page " + page
                         + " for location=" + location
@@ -121,11 +125,8 @@ public class AdzunaJobProvider implements JobProvider {
         }
     }
 
-    private String buildSearchQuery(String position) {
-        if (position == null || position.isBlank()) {
-            return "java developer";
-        }
-        return position.trim();
+    private String cleanPosition(String position) {
+        return position == null ? "" : position.trim();
     }
 
     private String encode(String value) {
@@ -138,11 +139,14 @@ public class AdzunaJobProvider implements JobProvider {
         JobPosting vacancy = new JobPosting();
         vacancy.setTitle(title);
         vacancy.setWebsiteName("adzuna.com");
-
         vacancy.setUrl(job.optString("redirect_url", ""));
+        vacancy.setDescription(job.optString("description", ""));
 
         JSONObject company = job.optJSONObject("company");
         vacancy.setCompanyName(company != null ? company.optString("display_name", "Unknown") : "Unknown");
+
+        JSONObject category = job.optJSONObject("category");
+        vacancy.setCategory(category != null ? category.optString("label", "") : "");
 
         JSONObject locationObj = job.optJSONObject("location");
         String city = "";

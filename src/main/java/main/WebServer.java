@@ -9,6 +9,7 @@ import model.ProviderException;
 import response.ErrorResponse;
 import response.JobSearchResponse;
 import response.JobSearchResult;
+import service.JobSearchCriteria;
 import service.JobSearchService;
 import vo.JobPosting;
 
@@ -105,6 +106,10 @@ public class WebServer {
 
             String location = params.get("location");
             String position = params.getOrDefault("position", "");
+            String category = params.getOrDefault("category", "");
+            String seniority = params.getOrDefault("seniority", "");
+            String workType = params.getOrDefault("workType", "");
+            String tag = params.getOrDefault("tag", "");
 
             if (location == null || location.isBlank()) {
                 sendJson(exchange, 400, new ErrorResponse("Location is required."));
@@ -113,10 +118,21 @@ public class WebServer {
 
             location = location.trim();
             position = position.trim();
-            System.out.println("Search request: location=" + location + ", position=" + position);
+            JobSearchCriteria criteria = new JobSearchCriteria(
+                    location,
+                    position,
+                    category,
+                    seniority,
+                    workType,
+                    tag
+            );
+            System.out.println("Search request: location=" + location
+                    + ", position=" + position
+                    + ", seniority=" + criteria.getSeniority()
+                    + ", workType=" + criteria.getWorkType());
 
             try {
-                List<JobPosting> jobs = jobSearchService.searchJobs(location, position);
+                List<JobPosting> jobs = jobSearchService.searchJobs(criteria);
                 List<JobSearchResult> jobResults = toResponse(jobs);
                 sendJson(exchange, 200, new JobSearchResponse(jobResults));
             } catch (ProviderException e) {

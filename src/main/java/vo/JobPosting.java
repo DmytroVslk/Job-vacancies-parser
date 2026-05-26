@@ -1,5 +1,8 @@
 package vo;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class JobPosting {
 
     private String title;
@@ -8,6 +11,12 @@ public class JobPosting {
     private String websiteName;
     private String url;
     private String salary;
+    private String description;
+    private String category;
+    private String seniority;
+    private String workType;
+    private boolean techRelated;
+    private List<String> tags = new ArrayList<>();
 
     @Override
     public boolean equals(Object o) {
@@ -81,5 +90,52 @@ public class JobPosting {
     public void setSalary(String salary) {
         this.salary = salary;
     }
-}
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getSeniority() {
+        return seniority;
+    }
+
+    public void setSeniority(String seniority) {
+        this.seniority = seniority;
+    }
+
+    public String getWorkType() {
+        return workType;
+    }
+
+    public void setWorkType(String workType) {
+        this.workType = workType;
+    }
+
+    public boolean isTechRelated() {
+        return techRelated;
+    }
+
+    public void setTechRelated(boolean techRelated) {
+        this.techRelated = techRelated;
+    }
+
+    public List<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = tags == null ? new ArrayList<>() : new ArrayList<>(tags);
+    }
+}
