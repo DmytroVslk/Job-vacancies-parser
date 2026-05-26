@@ -14,6 +14,7 @@ public class JobSearchService {
     private final JobWorkTypeClassifier workTypeClassifier = new JobWorkTypeClassifier();
     private final JobTechScopeClassifier techScopeClassifier = new JobTechScopeClassifier();
     private final JobTagClassifier tagClassifier = new JobTagClassifier();
+    private final JobRelevanceScorer relevanceScorer = new JobRelevanceScorer();
 
     public JobSearchService(JobProvider... providers) {
         if (providers == null || providers.length == 0) {
@@ -44,7 +45,8 @@ public class JobSearchService {
             }
         }
         if (!searchQuery.isEmpty()) {
-            jobs.sort((a, b) -> titleScore(b.getTitle(), searchQuery) - titleScore(a.getTitle(), searchQuery));
+            jobs.sort((a, b) -> relevanceScorer.score(b.getTitle(), searchQuery)
+                    - relevanceScorer.score(a.getTitle(), searchQuery));
         }
         return jobs;
     }
@@ -100,32 +102,5 @@ public class JobSearchService {
 
     private String normalize(String value) {
         return value == null ? "" : value.toLowerCase(Locale.ROOT);
-    }
-
-    private int titleScore(String title, String searchQuery) {
-        if (title == null) {
-            return 0;
-        }
-
-        String t = normalize(title);
-        String query = normalize(searchQuery);
-        int score = 0;
-
-        if (t.contains(query)) {
-            score += 5;
-        }
-
-        for (String word : query.split("\\s+")) {
-            if (!word.isBlank() && t.contains(word)) {
-                score += 2;
-            }
-        }
-
-        if (t.contains("developer"))        score += 1;
-        if (t.contains("engineer"))         score += 1;
-        if (t.contains("software"))         score += 1;
-        if (t.contains("junior"))           score += 1;
-        if (t.contains("entry level"))      score += 1;
-        return score;
     }
 }
