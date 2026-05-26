@@ -1,10 +1,31 @@
-# Java Job Aggregator Roadmap
+# Java Job Aggregator — Global Development Roadmap
+
+Important Project Scope Clarification
+------------------------------------
+The word "Java" in this project name refers to the technology used to build the application, not to the type of jobs the app searches for.
+
+This project is not limited to Java developer jobs. The goal is to build a general job search aggregator / job search assistant that can search many types of jobs across different industries, roles, seniority levels, and work styles.
+
+Examples of supported searches may include:
+
+    Software Engineer
+    Java Developer
+    Frontend Developer
+    Data Analyst
+    Project Manager
+    QA Engineer
+    DevOps Engineer
+    Marketing Specialist
+    Sales Representative
+    Remote jobs
+    Entry-level jobs
+    Internship jobs
 
 ## Project Goal
 
-Turn the current simple Java job search web app into a professional, portfolio-ready Java web application.
+Turn the current simple job search web app into a professional, portfolio-ready Java web application.
 
-The project starts as a Java 21 web application that searches Java developer jobs through external job APIs. The user opens a local web page, enters a location and optionally a position, and the frontend sends a request to:
+The project starts as a Java 21 web application that searches job postings across roles and industries through external job APIs. The user opens a local web page, enters a location and optionally a position, and the frontend sends a request to:
 
 ```text
 /search?location=...&position=...
@@ -14,7 +35,7 @@ The backend returns JSON with matching job postings.
 
 ## Long-Term Vision
 
-Grow the project from a simple job search aggregator into a Java Job Search Assistant that can:
+Grow the project from a simple job search aggregator into a job search assistant built with Java that can:
 
 - Search jobs
 - Filter jobs
@@ -62,9 +83,9 @@ Goal: make the backend clean, secure, understandable, and easier to maintain.
 
 Goal: make search results more useful, relevant, and closer to a real aggregator.
 
-- Improve Java job filtering using title, description, category, and available tags.
-- Improve relevance scoring for titles such as `Java Developer`, `Java Engineer`, `Java Backend Developer`, `Junior Java Developer`, and `Entry-Level Java Developer`.
-- Consider position keyword, seniority, remote status, and description in scoring.
+- Improve job filtering using title, description, category, seniority, location, work type, and available tags.
+- Improve relevance scoring for user-selected roles and keywords, such as `Software Engineer`, `Data Analyst`, `Project Manager`, `Marketing Specialist`, and `Warehouse Associate`.
+- Consider position keywords, seniority, location, remote/hybrid/onsite status, employment type, and description in scoring.
 - Add sorting by relevance first, then later by date, salary, or source.
 - Add duplicate detection using title, company, and location.
 - Add a provider/source field to `JobPosting`, for example `source: "Adzuna"`.
@@ -104,7 +125,7 @@ Goal: turn the app from a simple search tool into a useful job search assistant.
 
 Goal: make the project ready for a portfolio, GitHub, resume, or interview.
 
-- Add automated tests for URL building, API response parsing, Java job filtering, relevance scoring, duplicate detection, JSON response mapping, and service logic.
+- Add automated tests for URL building, API response parsing, job filtering across different roles, relevance scoring, duplicate detection, JSON response mapping, and service logic.
 - Improve README documentation with setup, environment variables, API examples, architecture, provider extension guide, and roadmap.
 - Add logging for search requests, provider errors, returned job counts, unexpected exceptions, and API failures.
 - Add security polish: no secrets in GitHub, input validation, encoded query parameters, no exposed stack traces, and request limits.
@@ -130,7 +151,7 @@ Frontend -> WebServer/Controller -> JobSearchService -> JobProviders -> External
 
 ## Portfolio Description
 
-Built a Java 21 web application that aggregates Java developer job postings from external job APIs. Implemented a local HTTP backend using Java's built-in `HttpServer`, provider-based architecture, JSON parsing, relevance-based sorting, duplicate detection, job filtering, and a simple HTML/CSS/JavaScript frontend. The project is designed to grow into a job search assistant with saved jobs, application tracking, database persistence, tests, documentation, and deployment support.
+Built a Java 21 web application that aggregates job postings across roles and industries from external job APIs. Implemented a local HTTP backend using Java's built-in `HttpServer`, provider-based architecture, JSON parsing, relevance-based sorting, duplicate detection, job filtering, and a simple HTML/CSS/JavaScript frontend. The project is designed to grow into a job search assistant with saved jobs, application tracking, database persistence, tests, documentation, and deployment support.
 
 ## Core Product Flow
 
