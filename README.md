@@ -12,6 +12,7 @@ The current product mode returns IT and tech-related vacancies only. The search 
 - Optionally narrow results by job title or keyword, such as Java Developer, Data Analyst, QA Engineer, or DevOps
 - Filter the backend search by category, seniority, work type, or a derived tag
 - Relevance-first sorting - title, description, location, and optional preferences determine result order
+- Duplicate removal based on title, company, and location when those values are available
 - Up to 250 results fetched per search (5 pages × 50 results)
 - Clean web UI with results rendered in a sortable table
 - Automatic browser launch on server start
@@ -22,7 +23,8 @@ The current product mode returns IT and tech-related vacancies only. The search 
 2. The browser sends a `GET /search?location=<city>&position=<position>` request to the local server; API clients may also send optional filter criteria.
 3. `AdzunaJobProvider` queries the Adzuna Jobs API with `where=<city>`; it includes `what=<position>` for a selected role, or Adzuna's `it-jobs` category for the broad `All IT / Tech Roles` search.
 4. `JobSearchService` identifies seniority and remote/hybrid/onsite work type, derives tags, keeps only postings matching the current IT/tech scope, filters position searches against title, description, and category, then sorts by relevance using role text, optional preferences, and an exact-city location bonus.
-5. Jackson serializes response objects to JSON; the UI renders it as a table.
+5. Duplicate detection removes repeated postings with the same title, company, and location after sorting, retaining the highest-ranked occurrence.
+6. Jackson serializes response objects to JSON; the UI renders it as a table.
 
 ## Architecture
 
@@ -38,6 +40,7 @@ src/main/java/
 │   ├── JobSearchCriteria.java — optional position/category/seniority/work-type/tag filters
 │   ├── JobSortOption.java — supported result ordering modes, currently relevance
 │   ├── JobRelevanceScorer.java — calculates relevance score for result ordering
+│   ├── JobDuplicateDetector.java — removes repeated title/company/location results
 │   ├── JobSeniorityClassifier.java — derives internship/junior/mid/senior/lead level
 │   ├── JobWorkTypeClassifier.java — derives remote/hybrid/onsite work type
 │   ├── JobTechScopeClassifier.java — identifies IT/tech-related postings
