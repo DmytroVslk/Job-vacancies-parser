@@ -15,6 +15,8 @@ public class JobPosting {
     private String category;
     private String seniority;
     private String workType;
+    private String employmentType;
+    private String employmentSchedule;
     private boolean techRelated;
     private List<String> tags = new ArrayList<>();
 
@@ -121,6 +123,22 @@ public class JobPosting {
 
     public void setWorkType(String workType) {
         this.workType = workType;
+    }
+
+    public String getEmploymentType() {
+        return employmentType;
+    }
+
+    public void setEmploymentType(String employmentType) {
+        this.employmentType = employmentType;
+    }
+
+    public String getEmploymentSchedule() {
+        return employmentSchedule;
+    }
+
+    public void setEmploymentSchedule(String employmentSchedule) {
+        this.employmentSchedule = employmentSchedule;
     }
 
     public boolean isTechRelated() {

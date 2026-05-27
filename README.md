@@ -11,7 +11,7 @@ The current product mode returns IT and tech-related vacancies only. The search 
 - Search IT and tech jobs by city or region (e.g. `Dallas`, `New York`, `Remote`)
 - Optionally narrow results by job title or keyword, such as Java Developer, Data Analyst, QA Engineer, or DevOps
 - Filter the backend search by category, seniority, work type, or a derived tag
-- Relevance scoring - titles matching the selected tech role appear first
+- Relevance-first sorting - title, description, location, and optional preferences determine result order
 - Up to 250 results fetched per search (5 pages × 50 results)
 - Clean web UI with results rendered in a sortable table
 - Automatic browser launch on server start
@@ -21,7 +21,7 @@ The current product mode returns IT and tech-related vacancies only. The search 
 1. The user enters a location and optionally a position in the web UI and submits a search.
 2. The browser sends a `GET /search?location=<city>&position=<position>` request to the local server; API clients may also send optional filter criteria.
 3. `AdzunaJobProvider` queries the Adzuna Jobs API with `where=<city>`; it includes `what=<position>` for a selected role, or Adzuna's `it-jobs` category for the broad `All IT / Tech Roles` search.
-4. `JobSearchService` identifies seniority and remote/hybrid/onsite work type, derives tags, keeps only postings matching the current IT/tech scope, filters position searches against title, description, and category, then sorts the matches by the current title relevance score.
+4. `JobSearchService` identifies seniority and remote/hybrid/onsite work type, derives tags, keeps only postings matching the current IT/tech scope, filters position searches against title, description, and category, then sorts by relevance using role text, optional preferences, and an exact-city location bonus.
 5. Jackson serializes response objects to JSON; the UI renders it as a table.
 
 ## Architecture
@@ -36,6 +36,8 @@ src/main/java/
 ├── service/
 │   ├── JobSearchService.java — search business logic
 │   ├── JobSearchCriteria.java — optional position/category/seniority/work-type/tag filters
+│   ├── JobSortOption.java — supported result ordering modes, currently relevance
+│   ├── JobRelevanceScorer.java — calculates relevance score for result ordering
 │   ├── JobSeniorityClassifier.java — derives internship/junior/mid/senior/lead level
 │   ├── JobWorkTypeClassifier.java — derives remote/hybrid/onsite work type
 │   ├── JobTechScopeClassifier.java — identifies IT/tech-related postings
@@ -49,7 +51,7 @@ src/main/java/
 │   ├── JobSearchResponse.java — standard success JSON returned by /search
 │   └── JobSearchResult.java   — job item shape inside /search responses
 └── vo/
-    └── JobPosting.java     — job data object (title, company, city, url, website, description, category, seniority, workType, techRelated, tags)
+    └── JobPosting.java     — job data object (title, company, city, url, website, description, category, seniority, workType, employmentType, employmentSchedule, techRelated, tags)
 ```
 
 ## Getting Started
@@ -86,7 +88,7 @@ The server starts at `http://localhost:8080` by default and opens in your defaul
 ## Search API
 
 ```
-GET /search?location={city}&position={job_title_or_keyword}&category={category}&seniority={level}&workType={type}&tag={tag}
+GET /search?location={city}&position={job_title_or_keyword}&category={category}&seniority={level}&preferredSeniority={level}&workType={type}&preferredWorkType={type}&preferredEmploymentType={type}&preferredEmploymentSchedule={schedule}&tag={tag}&sort={mode}
 ```
 
 | Parameter  | Description                          | Example       |
@@ -95,12 +97,17 @@ GET /search?location={city}&position={job_title_or_keyword}&category={category}&
 | `position` | Optional job title or keyword; omitted to search all jobs in the location | `data analyst` |
 | `category` | Optional provider category text | `IT Jobs` |
 | `seniority` | Optional derived level: `internship`, `junior`, `mid`, `senior`, or `lead` | `junior` |
+| `preferredSeniority` | Optional preferred level used to rank matching jobs without filtering other levels out | `junior` |
 | `workType` | Optional derived work type: `remote`, `hybrid`, or `onsite` | `remote` |
+| `preferredWorkType` | Optional preferred work type used to rank matching jobs without filtering other types out | `remote` |
+| `preferredEmploymentType` | Optional contract type preference from provider data: `permanent` or `contract` | `contract` |
+| `preferredEmploymentSchedule` | Optional schedule preference from provider data: `full-time` or `part-time` | `full-time` |
 | `tag` | Optional derived characteristic, currently values such as `tech`, seniority, or work type | `remote` |
+| `sort` | Optional result order; currently supports `relevance` and defaults to it | `relevance` |
 
 The current version returns only postings identified as IT or tech-related. Omitting `position` queries Adzuna's broad IT category in the selected location instead of silently forcing one particular role such as Java Developer. Searches for specific roles such as QA or Data Engineer still use their role keywords.
 
-The current web form sends `location` and `position`. The additional API filters are available in the backend now and can be exposed as frontend controls in a later UI stage.
+The current web form sends `location` and `position`; results are still sorted by relevance because that is the default mode. The additional API filters and explicit `sort=relevance` parameter are available in the backend now and can be exposed as frontend controls in a later UI stage.
 
 Returns a standard JSON response object:
 

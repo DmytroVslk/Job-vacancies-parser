@@ -11,6 +11,7 @@ import response.JobSearchResponse;
 import response.JobSearchResult;
 import service.JobSearchCriteria;
 import service.JobSearchService;
+import service.JobSortOption;
 import vo.JobPosting;
 
 import java.io.*;
@@ -110,6 +111,11 @@ public class WebServer {
             String seniority = params.getOrDefault("seniority", "");
             String workType = params.getOrDefault("workType", "");
             String tag = params.getOrDefault("tag", "");
+            String preferredSeniority = params.getOrDefault("preferredSeniority", "");
+            String preferredWorkType = params.getOrDefault("preferredWorkType", "");
+            String preferredEmploymentType = params.getOrDefault("preferredEmploymentType", "");
+            String preferredEmploymentSchedule = params.getOrDefault("preferredEmploymentSchedule", "");
+            String sort = params.getOrDefault("sort", "");
 
             if (location == null || location.isBlank()) {
                 sendJson(exchange, 400, new ErrorResponse("Location is required."));
@@ -118,18 +124,35 @@ public class WebServer {
 
             location = location.trim();
             position = position.trim();
+            JobSortOption sortOption;
+            try {
+                sortOption = JobSortOption.fromApiValue(sort);
+            } catch (IllegalArgumentException e) {
+                sendJson(exchange, 400, new ErrorResponse("Unsupported sort option. Supported value: relevance."));
+                return;
+            }
             JobSearchCriteria criteria = new JobSearchCriteria(
                     location,
                     position,
                     category,
                     seniority,
                     workType,
-                    tag
+                    tag,
+                    preferredSeniority,
+                    preferredWorkType,
+                    preferredEmploymentType,
+                    preferredEmploymentSchedule,
+                    sortOption
             );
             System.out.println("Search request: location=" + location
                     + ", position=" + position
                     + ", seniority=" + criteria.getSeniority()
-                    + ", workType=" + criteria.getWorkType());
+                    + ", preferredSeniority=" + criteria.getPreferredSeniority()
+                    + ", workType=" + criteria.getWorkType()
+                    + ", preferredWorkType=" + criteria.getPreferredWorkType()
+                    + ", preferredEmploymentType=" + criteria.getPreferredEmploymentType()
+                    + ", preferredEmploymentSchedule=" + criteria.getPreferredEmploymentSchedule()
+                    + ", sort=" + criteria.getSortOption().getApiValue());
 
             try {
                 List<JobPosting> jobs = jobSearchService.searchJobs(criteria);
