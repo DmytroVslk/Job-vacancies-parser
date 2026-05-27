@@ -25,6 +25,7 @@ public class AdzunaJobProvider implements JobProvider {
     private static final int PAGE_SIZE = 50;
     private static final int TIMEOUT_MS = 10000;
     private static final String IT_CATEGORY = "it-jobs";
+    private static final String SOURCE_NAME = "Adzuna";
 
     private final String appId;
     private final String appKey;
@@ -140,6 +141,7 @@ public class AdzunaJobProvider implements JobProvider {
         JobPosting vacancy = new JobPosting();
         vacancy.setTitle(title);
         vacancy.setWebsiteName("adzuna.com");
+        vacancy.setSource(SOURCE_NAME);
         vacancy.setUrl(job.optString("redirect_url", ""));
         vacancy.setDescription(job.optString("description", ""));
         vacancy.setEmploymentType(normalizeContractType(job.optString("contract_type", "")));

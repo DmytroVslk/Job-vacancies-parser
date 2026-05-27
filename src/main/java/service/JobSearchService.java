@@ -15,6 +15,7 @@ public class JobSearchService {
     private final JobTechScopeClassifier techScopeClassifier = new JobTechScopeClassifier();
     private final JobTagClassifier tagClassifier = new JobTagClassifier();
     private final JobRelevanceScorer relevanceScorer = new JobRelevanceScorer();
+    private final JobDuplicateDetector duplicateDetector = new JobDuplicateDetector();
 
     public JobSearchService(JobProvider... providers) {
         if (providers == null || providers.length == 0) {
@@ -44,7 +45,7 @@ public class JobSearchService {
             }
         }
         sortJobs(jobs, criteria);
-        return jobs;
+        return duplicateDetector.removeDuplicates(jobs);
     }
 
     private void sortJobs(List<JobPosting> jobs, JobSearchCriteria criteria) {
