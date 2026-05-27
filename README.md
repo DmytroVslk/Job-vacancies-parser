@@ -58,6 +58,18 @@ src/main/java/
     └── JobPosting.java     — job data object (title, company, city, url, website, source, description, category, seniority, workType, employmentType, employmentSchedule, techRelated, tags)
 ```
 
+## Adding a Job Provider
+
+`JobProvider` is the shared adapter contract for external job sources. Every provider must:
+
+1. Implement `getSourceName()` with the source label displayed for its postings, for example `Adzuna`.
+2. Implement `getJobPostings(location, position)` and translate those generic search inputs into its API request.
+3. Map API results into the common `JobPosting` fields, such as title, company, city, URL, description, category, and employment data when available.
+
+Register a new provider by passing it to `JobSearchService` together with existing providers. The service assigns the provider `source`, combines all returned postings, applies the current IT/tech scope and filters, sorts the combined result list by relevance, and removes duplicates across providers.
+
+The current application configures only `AdzunaJobProvider`. Connecting a real second external API is intentionally deferred to roadmap step `2.8`; retaining results when one provider fails is step `2.9`.
+
 ## Getting Started
 
 **Prerequisites:** Java 21, Maven
