@@ -85,9 +85,12 @@ Then edit `.env`:
 ```text
 ADZUNA_APP_ID=your_real_app_id
 ADZUNA_APP_KEY=your_real_app_key
+JOOBLE_API_KEY=your_real_jooble_api_key
 SERVER_PORT=8080
 ADZUNA_COUNTRY=us
 ```
+
+`JOOBLE_API_KEY` is prepared for the second provider integration in roadmap step `2.8`. Until `JoobleJobProvider` is connected, the existing Adzuna search continues to run without it.
 
 Real environment variables can still override values from `.env` when needed.
 

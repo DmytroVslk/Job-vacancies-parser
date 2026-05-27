@@ -13,6 +13,7 @@ public class AppConfig {
 
     private static final String ADZUNA_APP_ID_ENV = "ADZUNA_APP_ID";
     private static final String ADZUNA_APP_KEY_ENV = "ADZUNA_APP_KEY";
+    private static final String JOOBLE_API_KEY_ENV = "JOOBLE_API_KEY";
     private static final String SERVER_PORT_ENV = "SERVER_PORT";
     private static final String ADZUNA_COUNTRY_ENV = "ADZUNA_COUNTRY";
 
@@ -21,12 +22,14 @@ public class AppConfig {
 
     private final String adzunaAppId;
     private final String adzunaAppKey;
+    private final String joobleApiKey;
     private final int serverPort;
     private final String adzunaCountry;
 
-    private AppConfig(String adzunaAppId, String adzunaAppKey, int serverPort, String adzunaCountry) {
+    private AppConfig(String adzunaAppId, String adzunaAppKey, String joobleApiKey, int serverPort, String adzunaCountry) {
         this.adzunaAppId = adzunaAppId;
         this.adzunaAppKey = adzunaAppKey;
+        this.joobleApiKey = joobleApiKey;
         this.serverPort = serverPort;
         this.adzunaCountry = adzunaCountry;
     }
@@ -37,6 +40,7 @@ public class AppConfig {
         return new AppConfig(
                 readRequiredConfig(ADZUNA_APP_ID_ENV, dotenvValues),
                 readRequiredConfig(ADZUNA_APP_KEY_ENV, dotenvValues),
+                readOptionalConfig(JOOBLE_API_KEY_ENV, "", dotenvValues),
                 readServerPort(dotenvValues),
                 readOptionalConfig(ADZUNA_COUNTRY_ENV, DEFAULT_ADZUNA_COUNTRY, dotenvValues).toLowerCase()
         );
@@ -48,6 +52,10 @@ public class AppConfig {
 
     public String getAdzunaAppKey() {
         return adzunaAppKey;
+    }
+
+    public String getJoobleApiKey() {
+        return joobleApiKey;
     }
 
     public int getServerPort() {
