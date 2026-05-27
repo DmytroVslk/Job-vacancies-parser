@@ -29,7 +29,6 @@ public class JobSearchService {
     }
 
     public List<JobPosting> searchJobs(JobSearchCriteria criteria) {
-        String searchQuery = criteria.getPosition();
         List<JobPosting> jobs = new ArrayList<>();
         for (JobProvider provider : providers) {
             for (JobPosting job : provider.getJobPostings(criteria.getLocation(), criteria.getPosition())) {
@@ -44,11 +43,17 @@ public class JobSearchService {
                 }
             }
         }
-        if (!searchQuery.isEmpty()) {
-            jobs.sort((a, b) -> relevanceScorer.score(b.getTitle(), searchQuery)
-                    - relevanceScorer.score(a.getTitle(), searchQuery));
-        }
+        sortJobs(jobs, criteria);
         return jobs;
+    }
+
+    private void sortJobs(List<JobPosting> jobs, JobSearchCriteria criteria) {
+        if (criteria.getSortOption() == JobSortOption.RELEVANCE) {
+            jobs.sort((first, second) -> Integer.compare(
+                    relevanceScorer.score(second, criteria),
+                    relevanceScorer.score(first, criteria)
+            ));
+        }
     }
 
     private boolean hasTitle(JobPosting job) {

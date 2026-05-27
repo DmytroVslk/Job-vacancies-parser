@@ -16,6 +16,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class AdzunaJobProvider implements JobProvider {
 
@@ -141,6 +142,8 @@ public class AdzunaJobProvider implements JobProvider {
         vacancy.setWebsiteName("adzuna.com");
         vacancy.setUrl(job.optString("redirect_url", ""));
         vacancy.setDescription(job.optString("description", ""));
+        vacancy.setEmploymentType(normalizeContractType(job.optString("contract_type", "")));
+        vacancy.setEmploymentSchedule(normalizeContractTime(job.optString("contract_time", "")));
 
         JSONObject company = job.optJSONObject("company");
         vacancy.setCompanyName(company != null ? company.optString("display_name", "Unknown") : "Unknown");
@@ -162,5 +165,13 @@ public class AdzunaJobProvider implements JobProvider {
         vacancy.setCity(city);
 
         return vacancy;
+    }
+
+    private String normalizeContractType(String contractType) {
+        return contractType == null ? "" : contractType.trim().toLowerCase(Locale.ROOT).replace('_', '-');
+    }
+
+    private String normalizeContractTime(String contractTime) {
+        return contractTime == null ? "" : contractTime.trim().toLowerCase(Locale.ROOT).replace('_', '-');
     }
 }
