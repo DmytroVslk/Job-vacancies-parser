@@ -13,6 +13,7 @@ The current product mode returns IT and tech-related vacancies only. The search 
 - Filter the backend search by category, seniority, work type, or a derived tag
 - Relevance-first sorting - title, description, location, and optional preferences determine result order
 - Duplicate removal based on title, company, and location when those values are available
+- Provider source included for each posting, currently `Adzuna`
 - Up to 250 results fetched per search (5 pages × 50 results)
 - Clean web UI with results rendered in a sortable table
 - Automatic browser launch on server start
@@ -21,7 +22,7 @@ The current product mode returns IT and tech-related vacancies only. The search 
 
 1. The user enters a location and optionally a position in the web UI and submits a search.
 2. The browser sends a `GET /search?location=<city>&position=<position>` request to the local server; API clients may also send optional filter criteria.
-3. `AdzunaJobProvider` queries the Adzuna Jobs API with `where=<city>`; it includes `what=<position>` for a selected role, or Adzuna's `it-jobs` category for the broad `All IT / Tech Roles` search.
+3. `AdzunaJobProvider` queries the Adzuna Jobs API with `where=<city>`; it includes `what=<position>` for a selected role, or Adzuna's `it-jobs` category for the broad `All IT / Tech Roles` search, and identifies returned postings with `source: "Adzuna"`.
 4. `JobSearchService` identifies seniority and remote/hybrid/onsite work type, derives tags, keeps only postings matching the current IT/tech scope, filters position searches against title, description, and category, then sorts by relevance using role text, optional preferences, and an exact-city location bonus.
 5. Duplicate detection removes repeated postings with the same title, company, and location after sorting, retaining the highest-ranked occurrence.
 6. Jackson serializes response objects to JSON; the UI renders it as a table.
@@ -54,7 +55,7 @@ src/main/java/
 │   ├── JobSearchResponse.java — standard success JSON returned by /search
 │   └── JobSearchResult.java   — job item shape inside /search responses
 └── vo/
-    └── JobPosting.java     — job data object (title, company, city, url, website, description, category, seniority, workType, employmentType, employmentSchedule, techRelated, tags)
+    └── JobPosting.java     — job data object (title, company, city, url, website, source, description, category, seniority, workType, employmentType, employmentSchedule, techRelated, tags)
 ```
 
 ## Getting Started
@@ -124,7 +125,8 @@ Returns a standard JSON response object:
       "company": "Acme Corp",
       "location": "Dallas",
       "url": "https://...",
-      "website": "adzuna.com"
+      "website": "adzuna.com",
+      "source": "Adzuna"
     }
   ],
   "warnings": []

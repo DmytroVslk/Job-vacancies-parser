@@ -8,13 +8,15 @@ public class JobSearchResult {
     private final String location;
     private final String url;
     private final String website;
+    private final String source;
 
-    public JobSearchResult(String title, String company, String location, String url, String website) {
+    public JobSearchResult(String title, String company, String location, String url, String website, String source) {
         this.title = clean(title);
         this.company = clean(company);
         this.location = clean(location);
         this.url = clean(url);
         this.website = clean(website);
+        this.source = clean(source);
     }
 
     public static JobSearchResult from(JobPosting job) {
@@ -23,7 +25,8 @@ public class JobSearchResult {
                 job.getCompanyName(),
                 job.getCity(),
                 job.getUrl(),
-                job.getWebsiteName()
+                job.getWebsiteName(),
+                job.getSource()
         );
     }
 
@@ -45,6 +48,10 @@ public class JobSearchResult {
 
     public String getWebsite() {
         return website;
+    }
+
+    public String getSource() {
+        return source;
     }
 
     private static String clean(String value) {

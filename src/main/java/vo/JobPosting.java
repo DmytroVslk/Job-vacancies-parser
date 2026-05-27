@@ -9,6 +9,7 @@ public class JobPosting {
     private String city;
     private String companyName;
     private String websiteName;
+    private String source;
     private String url;
     private String salary;
     private String description;
@@ -75,6 +76,14 @@ public class JobPosting {
 
     public void setWebsiteName(String websiteName) {
         this.websiteName = websiteName;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
     }
 
     public String getUrl() {
