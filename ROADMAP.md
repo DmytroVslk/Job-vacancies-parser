@@ -91,7 +91,7 @@ Goal: make search results more useful, relevant, and closer to a real aggregator
 2.6. Add a provider/source field to `JobPosting`, for example `source: "Adzuna"`.  
 2.7. Prepare for multiple providers through a common `JobProvider` interface.  
 2.8. Add a second provider when the architecture is ready.  
-2.9. Handle partial provider failure by returning available jobs with warnings.
+2.9. Handle partial provider failure by returning available jobs with warnings. Done.
 
 ## Stage 3: Better Frontend
 

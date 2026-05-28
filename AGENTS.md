@@ -9,6 +9,7 @@ This project is a Java web application that aggregates and ranks job postings fr
 - Backend filtering by category, seniority, work type, and tags
 - Relevance sorting and duplicate removal across provider results
 - Provider `source` included for returned postings, currently `Adzuna` or `Jooble`
+- Partial provider failure handling returns successful provider results with warnings
 - REST-like search endpoint (`/search?location=...&position=...`)
 - Clean, sortable web UI
 - Automatic browser launch on server start
@@ -31,9 +32,9 @@ This project is a Java web application that aggregates and ranks job postings fr
 - Adzuna and Jooble are currently connected as real external providers.
 - Additional providers can be added through the common `JobProvider` contract when needed.
 
-### 2. Provider Failure Handling Is Not Yet Partial
-- A provider error currently fails the overall search request.
-- Returning jobs from successful providers with warnings remains future work.
+### 2. Provider Failure Handling Is Partial
+- If one provider fails while another succeeds, the API returns available jobs with warnings.
+- If every configured provider fails, the API returns a safe error response.
 
 ### 3. No Automated Tests
 - No unit or integration tests are present.

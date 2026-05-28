@@ -27,6 +27,7 @@ async function searchJobs() {
 
         const jobs = data.jobs || [];
         const count = data.count ?? jobs.length;
+        const warnings = data.warnings || [];
         
         // Очищаємо таблицю
         tableBody.innerHTML = '';
@@ -39,8 +40,8 @@ async function searchJobs() {
                     </td>
                 </tr>
             `;
-            statusDiv.textContent = 'No jobs found. Try adjusting your search.';
-            statusDiv.className = 'status';
+            statusDiv.textContent = buildStatusMessage('No jobs found. Try adjusting your search.', warnings);
+            statusDiv.className = warnings.length > 0 ? 'status warning' : 'status';
         } else {
             // Add each job to the table
             jobs.forEach(job => {
@@ -58,8 +59,8 @@ async function searchJobs() {
                 tableBody.appendChild(row);
             });
             
-            statusDiv.textContent = `Found ${count} jobs in ${location}`;
-            statusDiv.className = 'status success';
+            statusDiv.textContent = buildStatusMessage(`Found ${count} jobs in ${location}`, warnings);
+            statusDiv.className = warnings.length > 0 ? 'status warning' : 'status success';
         }
         
         jobCount.textContent = count;
@@ -86,6 +87,13 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+function buildStatusMessage(message, warnings) {
+    if (!warnings || warnings.length === 0) {
+        return message;
+    }
+    return `${message} ${warnings.join(' ')}`;
 }
 
 // Автоматичний пошук при завантаженні сторінки (опціонально)
