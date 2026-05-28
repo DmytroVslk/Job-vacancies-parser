@@ -12,6 +12,7 @@ import response.ErrorResponse;
 import response.JobSearchResponse;
 import response.JobSearchResult;
 import service.JobSearchCriteria;
+import service.JobSearchOutcome;
 import service.JobSearchService;
 import service.JobSortOption;
 import vo.JobPosting;
@@ -169,9 +170,9 @@ public class WebServer {
                     + ", sort=" + criteria.getSortOption().getApiValue());
 
             try {
-                List<JobPosting> jobs = jobSearchService.searchJobs(criteria);
-                List<JobSearchResult> jobResults = toResponse(jobs);
-                sendJson(exchange, 200, new JobSearchResponse(jobResults));
+                JobSearchOutcome outcome = jobSearchService.search(criteria);
+                List<JobSearchResult> jobResults = toResponse(outcome.getJobs());
+                sendJson(exchange, 200, new JobSearchResponse(jobResults, outcome.getWarnings()));
             } catch (ProviderException e) {
                 System.out.println("Job provider error: " + e.getMessage());
                 sendJson(exchange, 500, new ErrorResponse("Unable to fetch jobs right now. Please try again later."));

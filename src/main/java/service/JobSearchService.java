@@ -1,6 +1,7 @@
 package service;
 
 import model.JobProvider;
+import model.ProviderException;
 import vo.JobPosting;
 
 import java.util.ArrayList;
@@ -30,23 +31,44 @@ public class JobSearchService {
     }
 
     public List<JobPosting> searchJobs(JobSearchCriteria criteria) {
+        return search(criteria).getJobs();
+    }
+
+    public JobSearchOutcome search(JobSearchCriteria criteria) {
         List<JobPosting> jobs = new ArrayList<>();
+        List<String> warnings = new ArrayList<>();
+        int failedProviders = 0;
+
         for (JobProvider provider : providers) {
-            for (JobPosting job : provider.getJobPostings(criteria.getLocation(), criteria.getPosition())) {
-                if (hasTitle(job)) {
-                    job.setSource(provider.getSourceName());
-                    job.setSeniority(seniorityClassifier.classify(job));
-                    job.setWorkType(workTypeClassifier.classify(job));
-                    job.setTechRelated(techScopeClassifier.isTechRelated(job));
-                    job.setTags(tagClassifier.classify(job));
+            try {
+                for (JobPosting job : provider.getJobPostings(criteria.getLocation(), criteria.getPosition())) {
+                    if (hasTitle(job)) {
+                        job.setSource(provider.getSourceName());
+                        job.setSeniority(seniorityClassifier.classify(job));
+                        job.setWorkType(workTypeClassifier.classify(job));
+                        job.setTechRelated(techScopeClassifier.isTechRelated(job));
+                        job.setTags(tagClassifier.classify(job));
+                    }
+                    if (hasTitle(job) && job.isTechRelated() && matchesCriteria(job, criteria)) {
+                        jobs.add(job);
+                    }
                 }
-                if (hasTitle(job) && job.isTechRelated() && matchesCriteria(job, criteria)) {
-                    jobs.add(job);
-                }
+            } catch (RuntimeException e) {
+                failedProviders++;
+                String warning = provider.getSourceName()
+                        + " is temporarily unavailable. Showing results from other sources.";
+                warnings.add(warning);
+                System.out.println("Job provider failed: " + provider.getSourceName()
+                        + " - " + e.getMessage());
             }
         }
+
+        if (failedProviders == providers.length) {
+            throw new ProviderException("All job providers failed.");
+        }
+
         sortJobs(jobs, criteria);
-        return duplicateDetector.removeDuplicates(jobs);
+        return new JobSearchOutcome(duplicateDetector.removeDuplicates(jobs), warnings);
     }
 
     private void sortJobs(List<JobPosting> jobs, JobSearchCriteria criteria) {

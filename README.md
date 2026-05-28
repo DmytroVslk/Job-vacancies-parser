@@ -14,6 +14,7 @@ The current product mode returns IT and tech-related vacancies only. The search 
 - Relevance-first sorting - title, description, location, and optional preferences determine result order
 - Duplicate removal based on title, company, and location when those values are available
 - Provider source included for each posting, currently `Adzuna` or `Jooble`
+- Partial provider failure handling: successful provider results are still returned with warnings
 - Up to 250 results fetched per search (5 pages × 50 results)
 - Clean web UI with results rendered in a sortable table
 - Automatic browser launch on server start
@@ -24,9 +25,10 @@ The current product mode returns IT and tech-related vacancies only. The search 
 2. The browser sends a `GET /search?location=<city>&position=<position>` request to the local server; API clients may also send optional filter criteria.
 3. `AdzunaJobProvider` queries the Adzuna Jobs API with `where=<city>`; it includes `what=<position>` for a selected role, or Adzuna's `it-jobs` category for the broad `All IT / Tech Roles` search, and identifies returned postings with `source: "Adzuna"`.
 4. `JoobleJobProvider` queries the Jooble Jobs API when `JOOBLE_API_KEY` is configured; it uses selected role keywords or a broad IT/tech keyword query for `All IT / Tech Roles`, and identifies returned postings with `source: "Jooble"`.
-5. `JobSearchService` identifies seniority and remote/hybrid/onsite work type, derives tags, keeps only postings matching the current IT/tech scope, filters position searches against title, description, and category, then sorts by relevance using role text, optional preferences, and an exact-city location bonus.
-6. Duplicate detection removes repeated postings with the same title, company, and location after sorting, retaining the highest-ranked occurrence.
-7. Jackson serializes response objects to JSON; the UI renders it as a table.
+5. `JobSearchService` queries each provider independently, keeps successful results when another provider fails, and records safe warnings for the API response.
+6. The service identifies seniority and remote/hybrid/onsite work type, derives tags, keeps only postings matching the current IT/tech scope, filters position searches against title, description, and category, then sorts by relevance using role text, optional preferences, and an exact-city location bonus.
+7. Duplicate detection removes repeated postings with the same title, company, and location after sorting, retaining the highest-ranked occurrence.
+8. Jackson serializes response objects to JSON; the UI renders jobs as a table and displays any provider warnings in the status area.
 
 ## Architecture
 
@@ -39,6 +41,7 @@ src/main/java/
 │   └── AppConfig.java      — reads .env and environment configuration
 ├── service/
 │   ├── JobSearchService.java — search business logic
+│   ├── JobSearchOutcome.java — service result containing jobs plus provider warnings
 │   ├── JobSearchCriteria.java — optional position/category/seniority/work-type/tag filters
 │   ├── JobSortOption.java — supported result ordering modes, currently relevance
 │   ├── JobRelevanceScorer.java — calculates relevance score for result ordering
@@ -70,7 +73,7 @@ src/main/java/
 
 Register a new provider by passing it to `JobSearchService` together with existing providers. The service assigns the provider `source`, combines all returned postings, applies the current IT/tech scope and filters, sorts the combined result list by relevance, and removes duplicates across providers.
 
-The current application configures `AdzunaJobProvider` by default and enables `JoobleJobProvider` when `JOOBLE_API_KEY` is present. Retaining results when one provider fails is roadmap step `2.9`.
+The current application configures `AdzunaJobProvider` by default and enables `JoobleJobProvider` when `JOOBLE_API_KEY` is present. If one provider fails while another succeeds, `/search` still returns the available jobs and includes provider warnings in the response.
 
 ## Getting Started
 
@@ -151,6 +154,28 @@ Returns a standard JSON response object:
 ```
 
 Frontend code should read jobs from `response.jobs`.
+
+If one provider is temporarily unavailable, the response remains successful when another provider returns jobs:
+
+```json
+{
+  "success": true,
+  "count": 1,
+  "jobs": [
+    {
+      "title": "Java Developer",
+      "company": "Acme Corp",
+      "location": "Dallas",
+      "url": "https://...",
+      "website": "adzuna.com",
+      "source": "Adzuna"
+    }
+  ],
+  "warnings": [
+    "Jooble is temporarily unavailable. Showing results from other sources."
+  ]
+}
+```
 
 Error responses use the same standard shape:
 
