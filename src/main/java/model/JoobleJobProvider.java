@@ -26,6 +26,7 @@ public class JoobleJobProvider implements JobProvider {
     private static final int MAX_PAGES = 5;
     private static final int PAGE_SIZE = 50;
     private static final int TIMEOUT_MS = 10000;
+    private static final String BROAD_TECH_KEYWORDS = "software OR developer OR engineer OR data OR devops OR qa";
 
     private final String apiKey;
 
@@ -46,13 +47,14 @@ public class JoobleJobProvider implements JobProvider {
         List<JobPosting> allVacancies = new ArrayList<>();
 
         try {
+            String keywords = resolveKeywords(position);
             for (int page = 1; page <= MAX_PAGES; page++) {
                 System.out.println("Requesting Jooble page " + page
                         + " for location=" + location
-                        + ", position=" + clean(position));
+                        + ", keywords=" + keywords);
 
                 HttpURLConnection conn = openConnection();
-                writeRequest(conn, location, position, page);
+                writeRequest(conn, location, keywords, page);
 
                 int status = conn.getResponseCode();
                 if (status != 200) {
@@ -106,9 +108,9 @@ public class JoobleJobProvider implements JobProvider {
         return conn;
     }
 
-    private void writeRequest(HttpURLConnection conn, String location, String position, int page) throws IOException {
+    private void writeRequest(HttpURLConnection conn, String location, String keywords, int page) throws IOException {
         JSONObject request = new JSONObject();
-        request.put("keywords", clean(position));
+        request.put("keywords", clean(keywords));
         request.put("location", clean(location));
         request.put("page", page);
         request.put("ResultOnPage", PAGE_SIZE);
@@ -132,17 +134,25 @@ public class JoobleJobProvider implements JobProvider {
         }
     }
 
+    private String resolveKeywords(String position) {
+        String cleanedPosition = clean(position);
+        return cleanedPosition.isEmpty() ? BROAD_TECH_KEYWORDS : cleanedPosition;
+    }
+
     private JobPosting extractJobPosting(JSONObject job) {
         JobPosting vacancy = new JobPosting();
-        vacancy.setTitle(job.optString("title", ""));
-        vacancy.setCompanyName(job.optString("company", "Unknown"));
-        vacancy.setCity(job.optString("location", ""));
-        vacancy.setWebsiteName("jooble.org");
+        String type = job.optString("type", "");
+
+        vacancy.setTitle(clean(job.optString("title", "")));
+        vacancy.setCompanyName(cleanOrDefault(job.optString("company", ""), "Unknown"));
+        vacancy.setCity(clean(job.optString("location", "")));
+        vacancy.setWebsiteName(cleanOrDefault(job.optString("source", ""), "jooble.org"));
         vacancy.setSource(getSourceName());
-        vacancy.setUrl(job.optString("link", ""));
-        vacancy.setDescription(job.optString("snippet", ""));
-        vacancy.setSalary(job.optString("salary", ""));
-        vacancy.setEmploymentSchedule(normalizeType(job.optString("type", "")));
+        vacancy.setUrl(clean(job.optString("link", "")));
+        vacancy.setDescription(cleanDescription(job.optString("snippet", "")));
+        vacancy.setSalary(clean(job.optString("salary", "")));
+        vacancy.setEmploymentType(normalizeEmploymentType(type));
+        vacancy.setEmploymentSchedule(normalizeEmploymentSchedule(type));
         return vacancy;
     }
 
@@ -150,11 +160,45 @@ public class JoobleJobProvider implements JobProvider {
         return value == null ? "" : value.trim();
     }
 
+    private String cleanOrDefault(String value, String defaultValue) {
+        String cleanedValue = clean(value);
+        return cleanedValue.isEmpty() ? defaultValue : cleanedValue;
+    }
+
+    private String cleanDescription(String value) {
+        return clean(value)
+                .replaceAll("<[^>]+>", " ")
+                .replaceAll("\\s+", " ")
+                .trim();
+    }
+
     private String encode(String value) {
         return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 
-    private String normalizeType(String type) {
-        return clean(type).toLowerCase(Locale.ROOT).replace('_', '-').replace(' ', '-');
+    private String normalizeEmploymentType(String type) {
+        String normalizedType = normalize(type);
+        if (normalizedType.contains("contract") || normalizedType.contains("freelance")) {
+            return "contract";
+        }
+        if (normalizedType.contains("permanent")) {
+            return "permanent";
+        }
+        return "";
+    }
+
+    private String normalizeEmploymentSchedule(String type) {
+        String normalizedType = normalize(type);
+        if (normalizedType.contains("full-time")) {
+            return "full-time";
+        }
+        if (normalizedType.contains("part-time")) {
+            return "part-time";
+        }
+        return "";
+    }
+
+    private String normalize(String value) {
+        return clean(value).toLowerCase(Locale.ROOT).replace('_', '-').replace(' ', '-');
     }
 }

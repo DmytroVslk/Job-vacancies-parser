@@ -8,7 +8,7 @@ This project is a Java web application that aggregates and ranks job postings fr
 - Search IT and tech job postings by location, optionally narrowed by role keywords
 - Backend filtering by category, seniority, work type, and tags
 - Relevance sorting and duplicate removal across provider results
-- Provider `source` included for returned postings, currently `Adzuna`
+- Provider `source` included for returned postings, currently `Adzuna` or `Jooble`
 - REST-like search endpoint (`/search?location=...&position=...`)
 - Clean, sortable web UI
 - Automatic browser launch on server start
@@ -27,9 +27,9 @@ This project is a Java web application that aggregates and ranks job postings fr
 
 ## Shortcomings & Issues
 
-### 1. Single External Provider Configured
-- Only Adzuna is currently connected to a real external API.
-- The common `JobProvider` contract and multi-provider service pipeline are in place; adding the second real provider remains future work.
+### 1. Limited External Providers Configured
+- Adzuna and Jooble are currently connected as real external providers.
+- Additional providers can be added through the common `JobProvider` contract when needed.
 
 ### 2. Provider Failure Handling Is Not Yet Partial
 - A provider error currently fails the overall search request.
@@ -54,7 +54,7 @@ This project is a Java web application that aggregates and ranks job postings fr
 
 ## Recommendations for Agents
 - Always build with Maven and run with the specified main class.
-- Check for Adzuna API credentials in environment variables or local `.env` before running live searches.
+- Check for Adzuna and optional Jooble API credentials in environment variables or local `.env` before running live searches.
 - Prefer editing files in `src/`, not `bin/` or `target/`.
 - Link to [README.md](README.md) for usage and architecture details.
 - If adding a provider, implement `JobProvider`, map API responses to `JobPosting`, provide its `source` name, and register it in the application setup.

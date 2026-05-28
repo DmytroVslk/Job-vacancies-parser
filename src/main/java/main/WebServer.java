@@ -5,6 +5,8 @@ import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
 import model.AdzunaJobProvider;
+import model.JobProvider;
+import model.JoobleJobProvider;
 import model.ProviderException;
 import response.ErrorResponse;
 import response.JobSearchResponse;
@@ -30,13 +32,7 @@ public class WebServer {
         int port = config.getServerPort();
         String serverUrl = "http://localhost:" + port;
 
-        JobSearchService jobSearchService = new JobSearchService(
-                new AdzunaJobProvider(
-                        config.getAdzunaAppId(),
-                        config.getAdzunaAppKey(),
-                        config.getAdzunaCountry()
-                )
-        );
+        JobSearchService jobSearchService = new JobSearchService(createJobProviders(config));
         
         // Create HTTP server
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
@@ -54,6 +50,24 @@ public class WebServer {
         
         // Automatically open browser
         openBrowser(serverUrl);
+    }
+
+    private static JobProvider[] createJobProviders(AppConfig config) {
+        List<JobProvider> providers = new ArrayList<>();
+        providers.add(new AdzunaJobProvider(
+                config.getAdzunaAppId(),
+                config.getAdzunaAppKey(),
+                config.getAdzunaCountry()
+        ));
+
+        if (!config.getJoobleApiKey().isBlank()) {
+            providers.add(new JoobleJobProvider(config.getJoobleApiKey()));
+            System.out.println("Jooble provider enabled.");
+        } else {
+            System.out.println("Jooble provider disabled: JOOBLE_API_KEY is not set.");
+        }
+
+        return providers.toArray(new JobProvider[0]);
     }
 
     static class StaticFileHandler implements HttpHandler{
