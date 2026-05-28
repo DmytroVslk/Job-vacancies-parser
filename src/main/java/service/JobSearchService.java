@@ -34,6 +34,7 @@ public class JobSearchService {
         for (JobProvider provider : providers) {
             for (JobPosting job : provider.getJobPostings(criteria.getLocation(), criteria.getPosition())) {
                 if (hasTitle(job)) {
+                    job.setSource(provider.getSourceName());
                     job.setSeniority(seniorityClassifier.classify(job));
                     job.setWorkType(workTypeClassifier.classify(job));
                     job.setTechRelated(techScopeClassifier.isTechRelated(job));

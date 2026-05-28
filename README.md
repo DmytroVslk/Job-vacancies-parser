@@ -1,6 +1,6 @@
 # Java Job Aggregator
 
-A Java-based job search assistant designed to aggregate and rank job postings from the [Adzuna](https://www.adzuna.com/) jobs API. The initial version focuses on IT and tech-related roles such as software engineering, QA, data, DevOps, and internships, while its provider-based architecture can be extended to other industries later.
+A Java-based job search assistant designed to aggregate and rank job postings from external jobs APIs. The initial version focuses on IT and tech-related roles such as software engineering, QA, data, DevOps, and internships, while its provider-based architecture can be extended to other industries later.
 
 ## Current Scope and Future Expansion
 
@@ -13,7 +13,7 @@ The current product mode returns IT and tech-related vacancies only. The search 
 - Filter the backend search by category, seniority, work type, or a derived tag
 - Relevance-first sorting - title, description, location, and optional preferences determine result order
 - Duplicate removal based on title, company, and location when those values are available
-- Provider source included for each posting, currently `Adzuna`
+- Provider source included for each posting, currently `Adzuna` or `Jooble`
 - Up to 250 results fetched per search (5 pages × 50 results)
 - Clean web UI with results rendered in a sortable table
 - Automatic browser launch on server start
@@ -23,9 +23,10 @@ The current product mode returns IT and tech-related vacancies only. The search 
 1. The user enters a location and optionally a position in the web UI and submits a search.
 2. The browser sends a `GET /search?location=<city>&position=<position>` request to the local server; API clients may also send optional filter criteria.
 3. `AdzunaJobProvider` queries the Adzuna Jobs API with `where=<city>`; it includes `what=<position>` for a selected role, or Adzuna's `it-jobs` category for the broad `All IT / Tech Roles` search, and identifies returned postings with `source: "Adzuna"`.
-4. `JobSearchService` identifies seniority and remote/hybrid/onsite work type, derives tags, keeps only postings matching the current IT/tech scope, filters position searches against title, description, and category, then sorts by relevance using role text, optional preferences, and an exact-city location bonus.
-5. Duplicate detection removes repeated postings with the same title, company, and location after sorting, retaining the highest-ranked occurrence.
-6. Jackson serializes response objects to JSON; the UI renders it as a table.
+4. `JoobleJobProvider` queries the Jooble Jobs API when `JOOBLE_API_KEY` is configured; it uses selected role keywords or a broad IT/tech keyword query for `All IT / Tech Roles`, and identifies returned postings with `source: "Jooble"`.
+5. `JobSearchService` identifies seniority and remote/hybrid/onsite work type, derives tags, keeps only postings matching the current IT/tech scope, filters position searches against title, description, and category, then sorts by relevance using role text, optional preferences, and an exact-city location bonus.
+6. Duplicate detection removes repeated postings with the same title, company, and location after sorting, retaining the highest-ranked occurrence.
+7. Jackson serializes response objects to JSON; the UI renders it as a table.
 
 ## Architecture
 
@@ -48,6 +49,7 @@ src/main/java/
 │   └── JobTagClassifier.java — collects derived searchable characteristics
 ├── model/
 │   ├── AdzunaJobProvider.java — Adzuna API integration and response parsing
+│   ├── JoobleJobProvider.java — Jooble API integration and response parsing
 │   ├── JobProvider.java       — interface for job providers
 │   └── ProviderException.java — provider error type for safe API errors
 ├── response/
@@ -58,11 +60,23 @@ src/main/java/
     └── JobPosting.java     — job data object (title, company, city, url, website, source, description, category, seniority, workType, employmentType, employmentSchedule, techRelated, tags)
 ```
 
+## Adding a Job Provider
+
+`JobProvider` is the shared adapter contract for external job sources. Every provider must:
+
+1. Implement `getSourceName()` with the source label displayed for its postings, for example `Adzuna`.
+2. Implement `getJobPostings(location, position)` and translate those generic search inputs into its API request.
+3. Map API results into the common `JobPosting` fields, such as title, company, city, URL, description, category, and employment data when available.
+
+Register a new provider by passing it to `JobSearchService` together with existing providers. The service assigns the provider `source`, combines all returned postings, applies the current IT/tech scope and filters, sorts the combined result list by relevance, and removes duplicates across providers.
+
+The current application configures `AdzunaJobProvider` by default and enables `JoobleJobProvider` when `JOOBLE_API_KEY` is present. Retaining results when one provider fails is roadmap step `2.9`.
+
 ## Getting Started
 
 **Prerequisites:** Java 21, Maven
 
-Create an Adzuna application, copy the example config, and fill in your real credentials:
+Create provider API credentials, copy the example config, and fill in your real credentials:
 
 ```bash
 cp .env.example .env
@@ -73,9 +87,12 @@ Then edit `.env`:
 ```text
 ADZUNA_APP_ID=your_real_app_id
 ADZUNA_APP_KEY=your_real_app_key
+JOOBLE_API_KEY=your_real_jooble_api_key
 SERVER_PORT=8080
 ADZUNA_COUNTRY=us
 ```
+
+`JOOBLE_API_KEY` enables the Jooble provider. If it is blank, the app still runs with Adzuna only.
 
 Real environment variables can still override values from `.env` when needed.
 
@@ -109,7 +126,7 @@ GET /search?location={city}&position={job_title_or_keyword}&category={category}&
 | `tag` | Optional derived characteristic, currently values such as `tech`, seniority, or work type | `remote` |
 | `sort` | Optional result order; currently supports `relevance` and defaults to it | `relevance` |
 
-The current version returns only postings identified as IT or tech-related. Omitting `position` queries Adzuna's broad IT category in the selected location instead of silently forcing one particular role such as Java Developer. Searches for specific roles such as QA or Data Engineer still use their role keywords.
+The current version returns only postings identified as IT or tech-related. Omitting `position` queries Adzuna's broad IT category and Jooble's broad IT/tech keyword query in the selected location instead of silently forcing one particular role such as Java Developer. Searches for specific roles such as QA or Data Engineer still use their role keywords.
 
 The current web form sends `location` and `position`; results are still sorted by relevance because that is the default mode. The additional API filters and explicit `sort=relevance` parameter are available in the backend now and can be exposed as frontend controls in a later UI stage.
 
@@ -148,5 +165,5 @@ Error responses use the same standard shape:
 
 | Library        | Purpose                        |
 |----------------|-------------------------------|
-| `org.json`     | JSON parsing of Adzuna API responses |
+| `org.json`     | JSON parsing of provider API responses |
 | `jackson-databind` | JSON serialization of backend API responses |

@@ -2,19 +2,21 @@
 
 ## Project Overview
 
-This project is a Java web application that aggregates Java developer job postings from the Adzuna API and presents them in a browser-based UI. It uses a built-in HTTP server and follows the MVC pattern with a Strategy pattern for data providers.
+This project is a Java web application that aggregates and ranks job postings from external APIs and presents them in a browser-based UI. The current product scope focuses on IT and tech-related roles, while the provider-based design is intended to support additional sources and later additional industries. It uses a built-in HTTP server and follows the MVC pattern with provider adapters behind a common interface.
 
 ### Key Features
-- Search for Java developer jobs by location
-- Results filtered and sorted by relevance
-- REST-like search endpoint (`/search?location=...`)
+- Search IT and tech job postings by location, optionally narrowed by role keywords
+- Backend filtering by category, seniority, work type, and tags
+- Relevance sorting and duplicate removal across provider results
+- Provider `source` included for returned postings, currently `Adzuna` or `Jooble`
+- REST-like search endpoint (`/search?location=...&position=...`)
 - Clean, sortable web UI
 - Automatic browser launch on server start
 
 ### Architecture
 - **MVC**: Separation of concerns between Model, View, Controller
-- **Strategy**: Easily add new job provider APIs by implementing the `Strategy` interface
-- **Entry Points**: `WebServer.java` (main), `Aggregator.java` (console)
+- **Providers**: Add job API adapters by implementing the `JobProvider` interface
+- **Entry Point**: `WebServer.java`
 
 ### Build & Run
 - Requires **Java 21** and **Maven**
@@ -25,41 +27,37 @@ This project is a Java web application that aggregates Java developer job postin
 
 ## Shortcomings & Issues
 
-### 1. Hardcoded API Provider
-- Only Adzuna is implemented; no abstraction for multiple providers in use.
-- Adding new providers requires manual code changes and configuration.
+### 1. Limited External Providers Configured
+- Adzuna and Jooble are currently connected as real external providers.
+- Additional providers can be added through the common `JobProvider` contract when needed.
 
-### 2. No API Key Management
-- Adzuna API credentials are not documented or managed securely.
-- No environment variable or config file support for secrets.
+### 2. Provider Failure Handling Is Not Yet Partial
+- A provider error currently fails the overall search request.
+- Returning jobs from successful providers with warnings remains future work.
 
-### 3. Minimal Error Handling
-- Limited error handling for network/API failures, invalid input, or empty results.
-- No user feedback for backend errors.
-
-### 4. No Automated Tests
+### 3. No Automated Tests
 - No unit or integration tests are present.
 - No test instructions or coverage.
 
-### 5. Outdated Frontend Assets
+### 4. Outdated Frontend Assets
 - Some assets are duplicated in `bin/` and `src/`.
 - No build process for frontend (JS/CSS), possible drift between versions.
 
-### 6. Documentation Gaps
-- No CONTRIBUTING, architecture, or API authentication docs.
-- No instructions for adding new providers or extending the UI.
+### 5. Documentation Gaps
+- No CONTRIBUTING document or dedicated architecture document.
+- README covers setup and provider extension, but documentation can grow as new providers and frontend features are added.
 
-### 7. Java 21 Requirement
+### 6. Java 21 Requirement
 - Requires a recent JDK (21), which may not be available by default on all systems.
 
 ---
 
 ## Recommendations for Agents
 - Always build with Maven and run with the specified main class.
-- Check for API credentials before running.
+- Check for Adzuna and optional Jooble API credentials in environment variables or local `.env` before running live searches.
 - Prefer editing files in `src/`, not `bin/` or `target/`.
 - Link to [README.md](README.md) for usage and architecture details.
-- If adding a provider, implement the `Strategy` interface and update `Model.java`.
+- If adding a provider, implement `JobProvider`, map API responses to `JobPosting`, provide its `source` name, and register it in the application setup.
 - If updating the UI, keep `src/main/resources/view/` as the source of truth.
 
 ---

@@ -38,8 +38,8 @@ public class AdzunaJobProvider implements JobProvider {
     }
 
     @Override
-    public List<JobPosting> getJobPostings(String location) {
-        return getJobPostings(location, "");
+    public String getSourceName() {
+        return SOURCE_NAME;
     }
 
     @Override
@@ -141,7 +141,7 @@ public class AdzunaJobProvider implements JobProvider {
         JobPosting vacancy = new JobPosting();
         vacancy.setTitle(title);
         vacancy.setWebsiteName("adzuna.com");
-        vacancy.setSource(SOURCE_NAME);
+        vacancy.setSource(getSourceName());
         vacancy.setUrl(job.optString("redirect_url", ""));
         vacancy.setDescription(job.optString("description", ""));
         vacancy.setEmploymentType(normalizeContractType(job.optString("contract_type", "")));
