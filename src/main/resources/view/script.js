@@ -1,16 +1,41 @@
+const searchForm = document.getElementById('searchForm');
+const locationInput = document.getElementById('location');
+const positionSelect = document.getElementById('position');
+const locationError = document.getElementById('locationError');
+
+searchForm.addEventListener('submit', event => {
+    event.preventDefault();
+    searchJobs();
+});
+
+locationInput.addEventListener('input', () => {
+    if (locationInput.value.trim()) {
+        clearLocationError();
+    }
+});
+
 // Функція пошуку вакансій
 async function searchJobs() {
-    const location = document.getElementById('location').value;
-    const position = document.getElementById('position').value;
+    const location = locationInput.value.trim();
+    const position = positionSelect.value.trim();
     const statusDiv = document.getElementById('status');
     const searchBtn = document.getElementById('searchBtn');
     const tableBody = document.getElementById('jobsTableBody');
     const jobCount = document.getElementById('jobCount');
+
+    if (!validateSearchForm(location)) {
+        statusDiv.textContent = 'Please enter a location before searching.';
+        statusDiv.className = 'status error';
+        tableBody.innerHTML = '';
+        jobCount.textContent = '0';
+        return;
+    }
     
     // Показати статус завантаження
     statusDiv.textContent = `Searching for jobs in ${location}...`;
     statusDiv.className = 'status loading';
     searchBtn.disabled = true;
+    searchBtn.textContent = 'Searching...';
     
     // Очистити таблицю
     tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Loading...</td></tr>';
@@ -79,7 +104,27 @@ async function searchJobs() {
         `;
     } finally {
         searchBtn.disabled = false;
+        searchBtn.textContent = 'Search Jobs';
     }
+}
+
+function validateSearchForm(location) {
+    if (location) {
+        clearLocationError();
+        return true;
+    }
+
+    locationInput.classList.add('input-error');
+    locationInput.setAttribute('aria-invalid', 'true');
+    locationError.textContent = 'Location is required.';
+    locationInput.focus();
+    return false;
+}
+
+function clearLocationError() {
+    locationInput.classList.remove('input-error');
+    locationInput.removeAttribute('aria-invalid');
+    locationError.textContent = '';
 }
 
 // Захист від XSS

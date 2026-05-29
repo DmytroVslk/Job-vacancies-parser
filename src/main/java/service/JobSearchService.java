@@ -55,11 +55,9 @@ public class JobSearchService {
                 }
             } catch (RuntimeException e) {
                 failedProviders++;
-                String warning = provider.getSourceName()
-                        + " is temporarily unavailable. Showing results from other sources.";
+                String warning = provider.getSourceName() + " is temporarily unavailable. Showing results from other sources.";
                 warnings.add(warning);
-                System.out.println("Job provider failed: " + provider.getSourceName()
-                        + " - " + e.getMessage());
+                System.out.println("Job provider failed: " + provider.getSourceName() + " - " + e.getMessage());
             }
         }
 

@@ -15,21 +15,31 @@
         </header>
 
         <!-- Filters Panel  -->
-        <div class="filters">
+        <form id="searchForm" class="filters" novalidate>
             <div class="filter-group">
                 <label for="location">Location:</label>
-                <select id="location">
-                    <option value="Dallas, TX">Dallas, TX</option>
-                    <option value="Austin, TX">Austin, TX</option>
-                    <option value="San Francisco, CA">San Francisco, CA</option>
-                    <option value="New York, NY">New York, NY</option>
-                    <option value="Remote">Remote</option>
-                </select>
+                <input
+                    id="location"
+                    name="location"
+                    type="text"
+                    list="locationSuggestions"
+                    placeholder="Dallas, TX"
+                    autocomplete="address-level2"
+                    required
+                >
+                <datalist id="locationSuggestions">
+                    <option value="Dallas, TX"></option>
+                    <option value="Austin, TX"></option>
+                    <option value="San Francisco, CA"></option>
+                    <option value="New York, NY"></option>
+                    <option value="Remote"></option>
+                </datalist>
+                <span id="locationError" class="field-error" aria-live="polite"></span>
             </div>
 
             <div class="filter-group">
                 <label for="position">Position:</label>
-                <select id="position">
+                <select id="position" name="position">
                     <option value="">All IT / Tech Roles</option>
                     <option value="junior java developer">Junior Java Developer</option>
                     <option value="senior java developer">Senior Java Developer</option>
@@ -43,8 +53,8 @@
                 </select>
             </div>
 
-            <button id="searchBtn" onclick="searchJobs()">Search Jobs</button>
-        </div>
+            <button id="searchBtn" type="submit">Search Jobs</button>
+        </form>
 
         <!-- Status -->
         <div id="status" class="status">Ready to search. Select filters and click Search.</div>
