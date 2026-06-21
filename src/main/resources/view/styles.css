@@ -149,6 +149,12 @@ input:focus {
     border-left-color: #ffc107;
 }
 
+.status.empty {
+    background: #f8f9fa;
+    color: #495057;
+    border-left-color: #adb5bd;
+}
+
 .status.error {
     background: #f8d7da;
     color: #721c24;
@@ -218,10 +224,21 @@ tbody tr:hover {
     font-weight: 700;
 }
 
-.empty-state {
+.table-state {
     text-align: center;
     padding: 60px 20px;
+}
+
+.loading-state {
+    color: #856404;
+}
+
+.empty-state {
     color: #6c757d;
+}
+
+.error-state {
+    color: #dc3545;
 }
 
 .empty-state svg {

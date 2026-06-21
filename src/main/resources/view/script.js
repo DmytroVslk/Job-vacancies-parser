@@ -2,6 +2,10 @@ const searchForm = document.getElementById('searchForm');
 const locationInput = document.getElementById('location');
 const positionSelect = document.getElementById('position');
 const locationError = document.getElementById('locationError');
+const statusDiv = document.getElementById('status');
+const searchBtn = document.getElementById('searchBtn');
+const tableBody = document.getElementById('jobsTableBody');
+const jobCount = document.getElementById('jobCount');
 
 searchForm.addEventListener('submit', event => {
     event.preventDefault();
@@ -18,27 +22,16 @@ locationInput.addEventListener('input', () => {
 async function searchJobs() {
     const location = locationInput.value.trim();
     const position = positionSelect.value.trim();
-    const statusDiv = document.getElementById('status');
-    const searchBtn = document.getElementById('searchBtn');
-    const tableBody = document.getElementById('jobsTableBody');
-    const jobCount = document.getElementById('jobCount');
 
     if (!validateSearchForm(location)) {
-        statusDiv.textContent = 'Please enter a location before searching.';
-        statusDiv.className = 'status error';
-        tableBody.innerHTML = '';
-        jobCount.textContent = '0';
+        renderStatus('error', 'Please enter a location before searching.');
+        clearResults();
         return;
     }
     
-    // Показати статус завантаження
-    statusDiv.textContent = `Searching for jobs in ${location}...`;
-    statusDiv.className = 'status loading';
-    searchBtn.disabled = true;
-    searchBtn.textContent = 'Searching...';
-    
-    // Очистити таблицю
-    tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Loading...</td></tr>';
+    setSearchButtonLoading(true);
+    renderStatus('loading', `Searching for jobs in ${location}...`);
+    renderLoadingState();
     
     try {
         // Викликаємо API сервера
@@ -54,19 +47,11 @@ async function searchJobs() {
         const count = data.count ?? jobs.length;
         const warnings = data.warnings || [];
         
-        // Очищаємо таблицю
         tableBody.innerHTML = '';
         
         if (jobs.length === 0) {
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="4" class="empty-state">
-                        <p>No jobs found. Try different filters.</p>
-                    </td>
-                </tr>
-            `;
-            statusDiv.textContent = buildStatusMessage('No jobs found. Try adjusting your search.', warnings);
-            statusDiv.className = warnings.length > 0 ? 'status warning' : 'status';
+            renderEmptyState();
+            renderStatus(warnings.length > 0 ? 'warning' : 'empty', 'No jobs found. Try adjusting your search.', warnings);
         } else {
             // Add each job to the table
             jobs.forEach(job => {
@@ -84,8 +69,7 @@ async function searchJobs() {
                 tableBody.appendChild(row);
             });
             
-            statusDiv.textContent = buildStatusMessage(`Found ${count} jobs in ${location}`, warnings);
-            statusDiv.className = warnings.length > 0 ? 'status warning' : 'status success';
+            renderStatus(warnings.length > 0 ? 'warning' : 'success', `Found ${count} jobs in ${location}`, warnings);
         }
         
         jobCount.textContent = count;
@@ -93,19 +77,57 @@ async function searchJobs() {
     } catch (error) {
         console.error('Error:', error);
         const errorMessage = error.message || 'Error loading jobs. Please try again.';
-        statusDiv.textContent = `Error: ${errorMessage}`;
-        statusDiv.className = 'status';
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="4" style="text-align: center; color: #dc3545;">
-                    Error: ${escapeHtml(errorMessage)}
-                </td>
-            </tr>
-        `;
+        renderStatus('error', `Error: ${errorMessage}`);
+        renderErrorState(errorMessage);
+        jobCount.textContent = '0';
     } finally {
-        searchBtn.disabled = false;
-        searchBtn.textContent = 'Search Jobs';
+        setSearchButtonLoading(false);
     }
+}
+
+function renderStatus(type, message, warnings = []) {
+    statusDiv.textContent = buildStatusMessage(message, warnings);
+    statusDiv.className = `status ${type}`;
+}
+
+function renderLoadingState() {
+    tableBody.innerHTML = `
+        <tr>
+            <td colspan="4" class="table-state loading-state">
+                Loading jobs...
+            </td>
+        </tr>
+    `;
+}
+
+function renderEmptyState() {
+    tableBody.innerHTML = `
+        <tr>
+            <td colspan="4" class="table-state empty-state">
+                No jobs found. Try a different location or position.
+            </td>
+        </tr>
+    `;
+}
+
+function renderErrorState(message) {
+    tableBody.innerHTML = `
+        <tr>
+            <td colspan="4" class="table-state error-state">
+                ${escapeHtml(message)}
+            </td>
+        </tr>
+    `;
+}
+
+function clearResults() {
+    tableBody.innerHTML = '';
+    jobCount.textContent = '0';
+}
+
+function setSearchButtonLoading(isLoading) {
+    searchBtn.disabled = isLoading;
+    searchBtn.textContent = isLoading ? 'Searching...' : 'Search Jobs';
 }
 
 function validateSearchForm(location) {
