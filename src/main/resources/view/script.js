@@ -1,11 +1,17 @@
 const searchForm = document.getElementById('searchForm');
 const locationInput = document.getElementById('location');
 const positionSelect = document.getElementById('position');
+const sortSelect = document.getElementById('sort');
 const locationError = document.getElementById('locationError');
 const statusDiv = document.getElementById('status');
 const searchBtn = document.getElementById('searchBtn');
-const tableBody = document.getElementById('jobsTableBody');
+const jobsList = document.getElementById('jobsList');
 const jobCount = document.getElementById('jobCount');
+const visibleJobsSummary = document.getElementById('visibleJobsSummary');
+const loadMoreBtn = document.getElementById('loadMoreBtn');
+const JOBS_PER_PAGE = 10;
+let allJobs = [];
+let visibleJobCount = 0;
 
 searchForm.addEventListener('submit', event => {
     event.preventDefault();
@@ -18,10 +24,16 @@ locationInput.addEventListener('input', () => {
     }
 });
 
+loadMoreBtn.addEventListener('click', () => {
+    visibleJobCount += JOBS_PER_PAGE;
+    renderVisibleJobs();
+});
+
 // Функція пошуку вакансій
 async function searchJobs() {
     const location = locationInput.value.trim();
     const position = positionSelect.value.trim();
+    const sort = sortSelect.value;
 
     if (!validateSearchForm(location)) {
         renderStatus('error', 'Please enter a location before searching.');
@@ -34,8 +46,12 @@ async function searchJobs() {
     renderLoadingState();
     
     try {
-        // Викликаємо API сервера
-        const response = await fetch(`/search?location=${encodeURIComponent(location)}&position=${encodeURIComponent(position)}`);
+        const params = new URLSearchParams({
+            location,
+            position,
+            sort
+        });
+        const response = await fetch(`/search?${params.toString()}`);
         
         const data = await response.json();
 
@@ -43,32 +59,18 @@ async function searchJobs() {
             throw new Error(data.message || 'Network response was not ok');
         }
 
-        const jobs = data.jobs || [];
-        const count = data.count ?? jobs.length;
+        allJobs = data.jobs || [];
+        const count = data.count ?? allJobs.length;
         const warnings = data.warnings || [];
         
-        tableBody.innerHTML = '';
+        jobsList.innerHTML = '';
         
-        if (jobs.length === 0) {
+        if (allJobs.length === 0) {
             renderEmptyState();
             renderStatus(warnings.length > 0 ? 'warning' : 'empty', 'No jobs found. Try adjusting your search.', warnings);
         } else {
-            // Add each job to the table
-            jobs.forEach(job => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td><strong>${escapeHtml(job.title)}</strong></td>
-                    <td>${escapeHtml(job.company)}</td>
-                    <td>${escapeHtml(job.location)}</td>
-                    <td>
-                        <a href="${escapeHtml(job.url)}" target="_blank" class="apply-btn">
-                            View Job →
-                        </a>
-                    </td>
-                `;
-                tableBody.appendChild(row);
-            });
-            
+            visibleJobCount = JOBS_PER_PAGE;
+            renderVisibleJobs();
             renderStatus(warnings.length > 0 ? 'warning' : 'success', `Found ${count} jobs in ${location}`, warnings);
         }
         
@@ -91,43 +93,105 @@ function renderStatus(type, message, warnings = []) {
 }
 
 function renderLoadingState() {
-    tableBody.innerHTML = `
-        <tr>
-            <td colspan="4" class="table-state loading-state">
-                Loading jobs...
-            </td>
-        </tr>
+    loadMoreBtn.hidden = true;
+    jobsList.innerHTML = `
+        <div class="results-state loading-state">
+            Loading jobs...
+        </div>
     `;
 }
 
 function renderEmptyState() {
-    tableBody.innerHTML = `
-        <tr>
-            <td colspan="4" class="table-state empty-state">
-                No jobs found. Try a different location or position.
-            </td>
-        </tr>
+    loadMoreBtn.hidden = true;
+    jobsList.innerHTML = `
+        <div class="results-state empty-state">
+            No jobs found. Try a different location or position.
+        </div>
     `;
 }
 
 function renderErrorState(message) {
-    tableBody.innerHTML = `
-        <tr>
-            <td colspan="4" class="table-state error-state">
-                ${escapeHtml(message)}
-            </td>
-        </tr>
+    loadMoreBtn.hidden = true;
+    jobsList.innerHTML = `
+        <div class="results-state error-state">
+            ${escapeHtml(message)}
+        </div>
     `;
 }
 
 function clearResults() {
-    tableBody.innerHTML = '';
+    jobsList.innerHTML = '';
     jobCount.textContent = '0';
+    allJobs = [];
+    visibleJobCount = 0;
+    updateLoadMoreButton();
 }
 
 function setSearchButtonLoading(isLoading) {
     searchBtn.disabled = isLoading;
     searchBtn.textContent = isLoading ? 'Searching...' : 'Search Jobs';
+}
+
+function renderVisibleJobs() {
+    jobsList.innerHTML = '';
+    allJobs
+        .slice(0, visibleJobCount)
+        .forEach(job => jobsList.appendChild(createJobCard(job)));
+    updateLoadMoreButton();
+}
+
+function updateLoadMoreButton() {
+    const displayedJobs = Math.min(visibleJobCount, allJobs.length);
+    const hasJobs = allJobs.length > 0;
+    const hasMoreJobs = displayedJobs < allJobs.length;
+
+    visibleJobsSummary.hidden = !hasJobs;
+    if (hasJobs) {
+        visibleJobsSummary.textContent = `Showing ${displayedJobs} of ${allJobs.length} jobs`;
+    }
+
+    loadMoreBtn.hidden = !hasMoreJobs;
+    if (hasMoreJobs) {
+        const remainingJobs = allJobs.length - displayedJobs;
+        const nextBatchSize = Math.min(JOBS_PER_PAGE, remainingJobs);
+        loadMoreBtn.textContent = `Load ${nextBatchSize} More`;
+    }
+}
+
+function createJobCard(job) {
+    const card = document.createElement('article');
+    card.className = 'job-card';
+
+    const title = job.title || 'Untitled role';
+    const company = job.company || 'Company not listed';
+    const location = job.location || 'Location not listed';
+    const source = job.source || job.website || 'Unknown source';
+    const url = job.url || '#';
+    const salary = job.salary || '';
+    const salaryHtml = salary
+        ? `<span class="job-salary">${escapeHtml(salary)}</span>`
+        : '';
+
+    card.innerHTML = `
+        <div class="job-card-header">
+            <div>
+                <h3 class="job-title">${escapeHtml(title)}</h3>
+                <p class="job-company">${escapeHtml(company)}</p>
+            </div>
+            <span class="source-badge">${escapeHtml(source)}</span>
+        </div>
+        <div class="job-meta">
+            <span>${escapeHtml(location)}</span>
+            ${salaryHtml}
+        </div>
+        <div class="job-card-actions">
+            <a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="apply-btn">
+                View Job
+            </a>
+        </div>
+    `;
+
+    return card;
 }
 
 function validateSearchForm(location) {

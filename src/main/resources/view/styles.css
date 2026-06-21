@@ -44,6 +44,7 @@ header p {
     background: #f8f9fa;
     border-bottom: 2px solid #e9ecef;
     flex-wrap: wrap;
+    align-items: flex-start;
 }
 
 .filter-group {
@@ -104,7 +105,8 @@ input:focus {
     font-weight: 600;
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
-    align-self: flex-end;
+    align-self: flex-start;
+    margin-top: 26px;
 }
 
 #searchBtn:hover {
@@ -170,36 +172,72 @@ input:focus {
     color: #212529;
 }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
+.jobs-list {
+    display: grid;
+    gap: 16px;
+}
+
+.job-card {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
     background: white;
+    padding: 20px;
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-thead {
-    background: #f8f9fa;
+.job-card:hover {
+    border-color: #c3c9f4;
+    box-shadow: 0 8px 24px rgba(33, 37, 41, 0.08);
 }
 
-th {
-    padding: 15px;
-    text-align: left;
-    font-weight: 600;
-    color: #495057;
-    border-bottom: 2px solid #dee2e6;
+.job-card-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-start;
 }
 
-td {
-    padding: 15px;
-    border-bottom: 1px solid #dee2e6;
+.job-title {
     color: #212529;
+    font-size: 1.15rem;
+    line-height: 1.35;
+    margin-bottom: 6px;
 }
 
-tbody tr {
-    transition: background-color 0.2s;
+.job-company {
+    color: #495057;
+    font-size: 0.95rem;
 }
 
-tbody tr:hover {
+.source-badge {
+    flex: 0 0 auto;
+    max-width: 150px;
+    overflow-wrap: anywhere;
+    border: 1px solid #dee2e6;
+    border-radius: 999px;
     background: #f8f9fa;
+    color: #495057;
+    padding: 5px 10px;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.job-meta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    color: #6c757d;
+    margin-top: 14px;
+    font-size: 0.92rem;
+}
+
+.job-salary {
+    color: #155724;
+    font-weight: 700;
+}
+
+.job-card-actions {
+    margin-top: 18px;
 }
 
 .apply-btn {
@@ -219,14 +257,48 @@ tbody tr:hover {
     background: #5568d3;
 }
 
+.load-more-btn {
+    display: block;
+    margin: 24px auto 0;
+    padding: 11px 24px;
+    border: 1px solid #667eea;
+    border-radius: 8px;
+    background: white;
+    color: #5568d3;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 700;
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+
+.load-more-btn[hidden] {
+    display: none;
+}
+
+.load-more-btn:hover {
+    background: #667eea;
+    color: white;
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.22);
+}
+
+.visible-jobs-summary {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-top: 18px;
+    text-align: center;
+}
+
 #jobCount {
     color: #667eea;
     font-weight: 700;
 }
 
-.table-state {
+.results-state {
     text-align: center;
     padding: 60px 20px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    background: #f8f9fa;
 }
 
 .loading-state {
@@ -246,4 +318,34 @@ tbody tr:hover {
     height: 100px;
     margin-bottom: 20px;
     opacity: 0.5;
+}
+
+@media (max-width: 640px) {
+    .filters {
+        flex-direction: column;
+    }
+
+    select,
+    input,
+    #searchBtn,
+    .load-more-btn {
+        width: 100%;
+    }
+
+    #searchBtn {
+        margin-top: 0;
+    }
+
+    .job-card-header {
+        flex-direction: column;
+    }
+
+    .source-badge {
+        max-width: 100%;
+    }
+
+    .apply-btn {
+        width: 100%;
+        text-align: center;
+    }
 }

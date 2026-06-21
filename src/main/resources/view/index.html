@@ -53,27 +53,28 @@
                 </select>
             </div>
 
+            <div class="filter-group">
+                <label for="sort">Sort by:</label>
+                <select id="sort" name="sort">
+                    <option value="relevance">Relevance</option>
+                    <option value="newest">Newest</option>
+                    <option value="salary">Salary</option>
+                    <option value="company">Company</option>
+                </select>
+            </div>
+
             <button id="searchBtn" type="submit">Search Jobs</button>
         </form>
 
         <!-- Status -->
         <div id="status" class="status">Ready to search. Select filters and click Search.</div>
 
-        <!-- Results Table -->
+        <!-- Results -->
         <div class="results">
             <h2>Results: <span id="jobCount">0</span> jobs</h2>
-            <table id="jobsTable">
-                <thead>
-                    <tr>
-                        <th>Title</th>
-                        <th>Company</th>
-                        <th>Location</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="jobsTableBody">
-                </tbody>
-            </table>
+            <div id="jobsList" class="jobs-list"></div>
+            <p id="visibleJobsSummary" class="visible-jobs-summary" hidden></p>
+            <button id="loadMoreBtn" class="load-more-btn" type="button" hidden>Load More</button>
         </div>
     </div>
 

@@ -12,6 +12,7 @@ public class JobPosting {
     private String source;
     private String url;
     private String salary;
+    private String postedDate;
     private String description;
     private String category;
     private String seniority;
@@ -100,6 +101,14 @@ public class JobPosting {
 
     public void setSalary(String salary) {
         this.salary = salary;
+    }
+
+    public String getPostedDate() {
+        return postedDate;
+    }
+
+    public void setPostedDate(String postedDate) {
+        this.postedDate = postedDate;
     }
 
     public String getDescription() {

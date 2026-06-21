@@ -4,9 +4,15 @@ import model.JobProvider;
 import model.ProviderException;
 import vo.JobPosting;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class JobSearchService {
 
@@ -17,6 +23,7 @@ public class JobSearchService {
     private final JobTagClassifier tagClassifier = new JobTagClassifier();
     private final JobRelevanceScorer relevanceScorer = new JobRelevanceScorer();
     private final JobDuplicateDetector duplicateDetector = new JobDuplicateDetector();
+    private static final Pattern SALARY_NUMBER_PATTERN = Pattern.compile("(\\d[\\d,]*(?:\\.\\d+)?)\\s*([kK])?");
 
     public JobSearchService(JobProvider... providers) {
         if (providers == null || providers.length == 0) {
@@ -70,12 +77,100 @@ public class JobSearchService {
     }
 
     private void sortJobs(List<JobPosting> jobs, JobSearchCriteria criteria) {
-        if (criteria.getSortOption() == JobSortOption.RELEVANCE) {
-            jobs.sort((first, second) -> Integer.compare(
-                    relevanceScorer.score(second, criteria),
-                    relevanceScorer.score(first, criteria)
-            ));
+        jobs.sort((first, second) -> compareJobs(first, second, criteria));
+    }
+
+    private int compareJobs(JobPosting first, JobPosting second, JobSearchCriteria criteria) {
+        int result;
+        switch (criteria.getSortOption()) {
+            case NEWEST:
+                result = compareDescending(parsePostedDate(first.getPostedDate()), parsePostedDate(second.getPostedDate()));
+                break;
+            case SALARY:
+                result = compareDescending(extractSalaryAmount(first.getSalary()), extractSalaryAmount(second.getSalary()));
+                break;
+            case COMPANY:
+                result = compareAscending(first.getCompanyName(), second.getCompanyName());
+                break;
+            case RELEVANCE:
+            default:
+                result = compareRelevance(first, second, criteria);
+                break;
         }
+
+        if (result != 0) {
+            return result;
+        }
+        return compareRelevance(first, second, criteria);
+    }
+
+    private int compareRelevance(JobPosting first, JobPosting second, JobSearchCriteria criteria) {
+        return Integer.compare(
+                relevanceScorer.score(second, criteria),
+                relevanceScorer.score(first, criteria)
+        );
+    }
+
+    private int compareAscending(String firstValue, String secondValue) {
+        return normalize(firstValue).compareTo(normalize(secondValue));
+    }
+
+    private <T extends Comparable<T>> int compareDescending(T firstValue, T secondValue) {
+        if (firstValue == null && secondValue == null) {
+            return 0;
+        }
+        if (firstValue == null) {
+            return 1;
+        }
+        if (secondValue == null) {
+            return -1;
+        }
+        return secondValue.compareTo(firstValue);
+    }
+
+    private Instant parsePostedDate(String value) {
+        String cleanedValue = clean(value);
+        if (cleanedValue.isEmpty()) {
+            return null;
+        }
+
+        try {
+            return Instant.parse(cleanedValue);
+        } catch (RuntimeException ignored) {
+            // Try less specific date formats below.
+        }
+
+        try {
+            return OffsetDateTime.parse(cleanedValue).toInstant();
+        } catch (RuntimeException ignored) {
+            // Try plain yyyy-MM-dd below.
+        }
+
+        try {
+            return LocalDate.parse(cleanedValue).atStartOfDay(ZoneOffset.UTC).toInstant();
+        } catch (RuntimeException ignored) {
+            return null;
+        }
+    }
+
+    private Double extractSalaryAmount(String salary) {
+        String cleanedSalary = clean(salary);
+        if (cleanedSalary.isEmpty()) {
+            return null;
+        }
+
+        Matcher matcher = SALARY_NUMBER_PATTERN.matcher(cleanedSalary);
+        Double maxValue = null;
+        while (matcher.find()) {
+            double value = Double.parseDouble(matcher.group(1).replace(",", ""));
+            if (matcher.group(2) != null) {
+                value *= 1000;
+            }
+            if (maxValue == null || value > maxValue) {
+                maxValue = value;
+            }
+        }
+        return maxValue;
     }
 
     private boolean hasTitle(JobPosting job) {
@@ -129,5 +224,9 @@ public class JobSearchService {
 
     private String normalize(String value) {
         return value == null ? "" : value.toLowerCase(Locale.ROOT);
+    }
+
+    private String clean(String value) {
+        return value == null ? "" : value.trim();
     }
 }

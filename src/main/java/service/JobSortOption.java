@@ -4,7 +4,10 @@ import java.util.Locale;
 
 public enum JobSortOption {
 
-    RELEVANCE("relevance");
+    RELEVANCE("relevance"),
+    NEWEST("newest"),
+    SALARY("salary"),
+    COMPANY("company");
 
     private final String apiValue;
 
@@ -29,5 +32,16 @@ public enum JobSortOption {
         }
 
         throw new IllegalArgumentException("Unsupported sort option: " + value);
+    }
+
+    public static String supportedApiValues() {
+        StringBuilder values = new StringBuilder();
+        for (JobSortOption option : values()) {
+            if (!values.isEmpty()) {
+                values.append(", ");
+            }
+            values.append(option.apiValue);
+        }
+        return values.toString();
     }
 }

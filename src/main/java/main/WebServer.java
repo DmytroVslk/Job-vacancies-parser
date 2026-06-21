@@ -143,7 +143,9 @@ public class WebServer {
             try {
                 sortOption = JobSortOption.fromApiValue(sort);
             } catch (IllegalArgumentException e) {
-                sendJson(exchange, 400, new ErrorResponse("Unsupported sort option. Supported value: relevance."));
+                sendJson(exchange, 400, new ErrorResponse(
+                        "Unsupported sort option. Supported values: " + JobSortOption.supportedApiValues() + "."
+                ));
                 return;
             }
             JobSearchCriteria criteria = new JobSearchCriteria(

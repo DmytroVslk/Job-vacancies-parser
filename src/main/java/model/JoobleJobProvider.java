@@ -15,9 +15,12 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class JoobleJobProvider implements JobProvider {
 
@@ -27,6 +30,7 @@ public class JoobleJobProvider implements JobProvider {
     private static final int PAGE_SIZE = 50;
     private static final int TIMEOUT_MS = 10000;
     private static final String BROAD_TECH_KEYWORDS = "software OR developer OR engineer OR data OR devops OR qa";
+    private static final Pattern SALARY_NUMBER_PATTERN = Pattern.compile("(\\d[\\d,]*(?:\\.\\d+)?)\\s*([kK])?");
 
     private final String apiKey;
 
@@ -150,10 +154,56 @@ public class JoobleJobProvider implements JobProvider {
         vacancy.setSource(getSourceName());
         vacancy.setUrl(clean(job.optString("link", "")));
         vacancy.setDescription(cleanDescription(job.optString("snippet", "")));
-        vacancy.setSalary(clean(job.optString("salary", "")));
+        vacancy.setSalary(formatSalary(job.optString("salary", "")));
+        vacancy.setPostedDate(resolvePostedDate(job));
         vacancy.setEmploymentType(normalizeEmploymentType(type));
         vacancy.setEmploymentSchedule(normalizeEmploymentSchedule(type));
         return vacancy;
+    }
+
+    private String formatSalary(String salary) {
+        String cleanedSalary = clean(salary);
+        if (cleanedSalary.isEmpty()) {
+            return "";
+        }
+
+        List<String> salaryParts = new ArrayList<>();
+        Matcher matcher = SALARY_NUMBER_PATTERN.matcher(cleanedSalary);
+        while (matcher.find()) {
+            double value = Double.parseDouble(matcher.group(1).replace(",", ""));
+            if (matcher.group(2) != null) {
+                value *= 1000;
+            }
+            salaryParts.add(formatMoney(value));
+        }
+
+        if (salaryParts.isEmpty()) {
+            return cleanedSalary;
+        }
+        if (salaryParts.size() == 1) {
+            return salaryParts.get(0);
+        }
+        return salaryParts.get(0) + " - " + salaryParts.get(salaryParts.size() - 1);
+    }
+
+    private String formatMoney(double value) {
+        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.US);
+        currencyFormat.setMaximumFractionDigits(0);
+        return currencyFormat.format(Math.round(value));
+    }
+
+    private String resolvePostedDate(JSONObject job) {
+        String updated = clean(job.optString("updated", ""));
+        if (!updated.isEmpty()) {
+            return updated;
+        }
+
+        String date = clean(job.optString("date", ""));
+        if (!date.isEmpty()) {
+            return date;
+        }
+
+        return clean(job.optString("created", ""));
     }
 
     private String clean(String value) {

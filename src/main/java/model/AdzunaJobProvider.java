@@ -14,6 +14,7 @@ import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -144,6 +145,8 @@ public class AdzunaJobProvider implements JobProvider {
         vacancy.setSource(getSourceName());
         vacancy.setUrl(job.optString("redirect_url", ""));
         vacancy.setDescription(job.optString("description", ""));
+        vacancy.setSalary(formatSalary(job));
+        vacancy.setPostedDate(job.optString("created", ""));
         vacancy.setEmploymentType(normalizeContractType(job.optString("contract_type", "")));
         vacancy.setEmploymentSchedule(normalizeContractTime(job.optString("contract_time", "")));
 
@@ -167,6 +170,28 @@ public class AdzunaJobProvider implements JobProvider {
         vacancy.setCity(city);
 
         return vacancy;
+    }
+
+    private String formatSalary(JSONObject job) {
+        double minSalary = job.optDouble("salary_min", Double.NaN);
+        double maxSalary = job.optDouble("salary_max", Double.NaN);
+
+        if (Double.isNaN(minSalary) && Double.isNaN(maxSalary)) {
+            return "";
+        }
+        if (Double.isNaN(minSalary)) {
+            return formatMoney(maxSalary);
+        }
+        if (Double.isNaN(maxSalary) || Math.round(minSalary) == Math.round(maxSalary)) {
+            return formatMoney(minSalary);
+        }
+        return formatMoney(minSalary) + " - " + formatMoney(maxSalary);
+    }
+
+    private String formatMoney(double value) {
+        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.US);
+        currencyFormat.setMaximumFractionDigits(0);
+        return currencyFormat.format(Math.round(value));
     }
 
     private String normalizeContractType(String contractType) {
