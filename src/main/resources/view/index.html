@@ -63,7 +63,50 @@
                 </select>
             </div>
 
-            <button id="searchBtn" type="submit">Search Jobs</button>
+            <div class="filter-group">
+                <label for="workType">Work type:</label>
+                <select id="workType" name="workType">
+                    <option value="">Any</option>
+                    <option value="remote">Remote</option>
+                    <option value="hybrid">Hybrid</option>
+                    <option value="onsite">Onsite</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="seniority">Seniority:</label>
+                <select id="seniority" name="seniority">
+                    <option value="">Any</option>
+                    <option value="internship">Internship</option>
+                    <option value="junior">Junior</option>
+                    <option value="mid">Mid</option>
+                    <option value="senior">Senior</option>
+                    <option value="lead">Lead</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="minimumSalary">Salary:</label>
+                <select id="minimumSalary" name="minimumSalary">
+                    <option value="">Any salary</option>
+                    <option value="available">Salary listed</option>
+                    <option value="60000">$60k+</option>
+                    <option value="100000">$100k+</option>
+                    <option value="140000">$140k+</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="postedWithinDays">Date posted:</label>
+                <select id="postedWithinDays" name="postedWithinDays">
+                    <option value="">Any time</option>
+                    <option value="1">Past 24 hours</option>
+                    <option value="7">Past week</option>
+                    <option value="30">Past month</option>
+                </select>
+            </div>
+
+            <button id="searchBtn" class="search-button" type="submit">Search Jobs</button>
         </form>
 
         <!-- Status -->

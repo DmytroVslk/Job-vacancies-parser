@@ -8,6 +8,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -182,7 +183,9 @@ public class JobSearchService {
                 && matchesPartialValue(job.getCategory(), criteria.getCategory())
                 && matchesValue(job.getSeniority(), criteria.getSeniority())
                 && matchesValue(job.getWorkType(), criteria.getWorkType())
-                && matchesTag(job, criteria.getTag());
+                && matchesTag(job, criteria.getTag())
+                && matchesMinimumSalary(job, criteria.getMinimumSalary())
+                && matchesPostedWithinDays(job, criteria.getPostedWithinDays());
     }
 
     private boolean matchesPosition(JobPosting job, String searchQuery) {
@@ -220,6 +223,46 @@ public class JobSearchService {
             }
         }
         return false;
+    }
+
+    private boolean matchesMinimumSalary(JobPosting job, String minimumSalary) {
+        if (minimumSalary.isEmpty()) {
+            return true;
+        }
+
+        Double salaryAmount = extractSalaryAmount(job.getSalary());
+        if (salaryAmount == null) {
+            return false;
+        }
+
+        if ("available".equals(normalize(minimumSalary))) {
+            return true;
+        }
+
+        try {
+            return salaryAmount >= Double.parseDouble(minimumSalary);
+        } catch (NumberFormatException e) {
+            return true;
+        }
+    }
+
+    private boolean matchesPostedWithinDays(JobPosting job, String postedWithinDays) {
+        if (postedWithinDays.isEmpty()) {
+            return true;
+        }
+
+        Instant postedDate = parsePostedDate(job.getPostedDate());
+        if (postedDate == null) {
+            return false;
+        }
+
+        try {
+            int days = Integer.parseInt(postedWithinDays);
+            Instant earliestAllowedDate = Instant.now().minus(days, ChronoUnit.DAYS);
+            return !postedDate.isBefore(earliestAllowedDate);
+        } catch (NumberFormatException e) {
+            return true;
+        }
     }
 
     private String normalize(String value) {

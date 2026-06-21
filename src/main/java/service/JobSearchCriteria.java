@@ -12,6 +12,8 @@ public class JobSearchCriteria {
     private final String preferredWorkType;
     private final String preferredEmploymentType;
     private final String preferredEmploymentSchedule;
+    private final String minimumSalary;
+    private final String postedWithinDays;
     private final JobSortOption sortOption;
 
     public JobSearchCriteria(
@@ -22,7 +24,7 @@ public class JobSearchCriteria {
             String workType,
             String tag
     ) {
-        this(location, position, category, seniority, workType, tag, "", "", "", "", JobSortOption.RELEVANCE);
+        this(location, position, category, seniority, workType, tag, "", "", "", "", "", "", JobSortOption.RELEVANCE);
     }
 
     public JobSearchCriteria(
@@ -34,7 +36,7 @@ public class JobSearchCriteria {
             String tag,
             String preferredSeniority
     ) {
-        this(location, position, category, seniority, workType, tag, preferredSeniority, "", "", "", JobSortOption.RELEVANCE);
+        this(location, position, category, seniority, workType, tag, preferredSeniority, "", "", "", "", "", JobSortOption.RELEVANCE);
     }
 
     public JobSearchCriteria(
@@ -48,7 +50,7 @@ public class JobSearchCriteria {
             String preferredWorkType
     ) {
         this(location, position, category, seniority, workType, tag,
-                preferredSeniority, preferredWorkType, "", "", JobSortOption.RELEVANCE);
+                preferredSeniority, preferredWorkType, "", "", "", "", JobSortOption.RELEVANCE);
     }
 
     public JobSearchCriteria(
@@ -65,7 +67,7 @@ public class JobSearchCriteria {
     ) {
         this(location, position, category, seniority, workType, tag,
                 preferredSeniority, preferredWorkType, preferredEmploymentType,
-                preferredEmploymentSchedule, JobSortOption.RELEVANCE);
+                preferredEmploymentSchedule, "", "", JobSortOption.RELEVANCE);
     }
 
     public JobSearchCriteria(
@@ -79,6 +81,8 @@ public class JobSearchCriteria {
             String preferredWorkType,
             String preferredEmploymentType,
             String preferredEmploymentSchedule,
+            String minimumSalary,
+            String postedWithinDays,
             JobSortOption sortOption
     ) {
         this.location = clean(location);
@@ -91,6 +95,8 @@ public class JobSearchCriteria {
         this.preferredWorkType = clean(preferredWorkType);
         this.preferredEmploymentType = clean(preferredEmploymentType);
         this.preferredEmploymentSchedule = clean(preferredEmploymentSchedule);
+        this.minimumSalary = clean(minimumSalary);
+        this.postedWithinDays = clean(postedWithinDays);
         this.sortOption = sortOption == null ? JobSortOption.RELEVANCE : sortOption;
     }
 
@@ -132,6 +138,14 @@ public class JobSearchCriteria {
 
     public String getPreferredEmploymentSchedule() {
         return preferredEmploymentSchedule;
+    }
+
+    public String getMinimumSalary() {
+        return minimumSalary;
+    }
+
+    public String getPostedWithinDays() {
+        return postedWithinDays;
     }
 
     public JobSortOption getSortOption() {

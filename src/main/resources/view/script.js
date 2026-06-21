@@ -2,6 +2,10 @@ const searchForm = document.getElementById('searchForm');
 const locationInput = document.getElementById('location');
 const positionSelect = document.getElementById('position');
 const sortSelect = document.getElementById('sort');
+const workTypeSelect = document.getElementById('workType');
+const senioritySelect = document.getElementById('seniority');
+const minimumSalarySelect = document.getElementById('minimumSalary');
+const postedWithinDaysSelect = document.getElementById('postedWithinDays');
 const locationError = document.getElementById('locationError');
 const statusDiv = document.getElementById('status');
 const searchBtn = document.getElementById('searchBtn');
@@ -9,7 +13,7 @@ const jobsList = document.getElementById('jobsList');
 const jobCount = document.getElementById('jobCount');
 const visibleJobsSummary = document.getElementById('visibleJobsSummary');
 const loadMoreBtn = document.getElementById('loadMoreBtn');
-const JOBS_PER_PAGE = 10;
+const JOBS_PER_PAGE = 15;
 let allJobs = [];
 let visibleJobCount = 0;
 
@@ -34,6 +38,10 @@ async function searchJobs() {
     const location = locationInput.value.trim();
     const position = positionSelect.value.trim();
     const sort = sortSelect.value;
+    const workType = workTypeSelect.value;
+    const seniority = senioritySelect.value;
+    const minimumSalary = minimumSalarySelect.value;
+    const postedWithinDays = postedWithinDaysSelect.value;
 
     if (!validateSearchForm(location)) {
         renderStatus('error', 'Please enter a location before searching.');
@@ -49,7 +57,11 @@ async function searchJobs() {
         const params = new URLSearchParams({
             location,
             position,
-            sort
+            sort,
+            workType,
+            seniority,
+            minimumSalary,
+            postedWithinDays
         });
         const response = await fetch(`/search?${params.toString()}`);
         
@@ -60,7 +72,7 @@ async function searchJobs() {
         }
 
         allJobs = data.jobs || [];
-        const count = data.count ?? allJobs.length;
+        const count = allJobs.length;
         const warnings = data.warnings || [];
         
         jobsList.innerHTML = '';

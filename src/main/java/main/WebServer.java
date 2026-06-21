@@ -130,6 +130,8 @@ public class WebServer {
             String preferredWorkType = params.getOrDefault("preferredWorkType", "");
             String preferredEmploymentType = params.getOrDefault("preferredEmploymentType", "");
             String preferredEmploymentSchedule = params.getOrDefault("preferredEmploymentSchedule", "");
+            String minimumSalary = params.getOrDefault("minimumSalary", "");
+            String postedWithinDays = params.getOrDefault("postedWithinDays", "");
             String sort = params.getOrDefault("sort", "");
 
             if (location == null || location.isBlank()) {
@@ -159,6 +161,8 @@ public class WebServer {
                     preferredWorkType,
                     preferredEmploymentType,
                     preferredEmploymentSchedule,
+                    minimumSalary,
+                    postedWithinDays,
                     sortOption
             );
             System.out.println("Search request: location=" + location
@@ -169,6 +173,8 @@ public class WebServer {
                     + ", preferredWorkType=" + criteria.getPreferredWorkType()
                     + ", preferredEmploymentType=" + criteria.getPreferredEmploymentType()
                     + ", preferredEmploymentSchedule=" + criteria.getPreferredEmploymentSchedule()
+                    + ", minimumSalary=" + criteria.getMinimumSalary()
+                    + ", postedWithinDays=" + criteria.getPostedWithinDays()
                     + ", sort=" + criteria.getSortOption().getApiValue());
 
             try {
