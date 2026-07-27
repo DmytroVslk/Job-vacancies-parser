@@ -15,8 +15,8 @@ The current product mode returns IT and tech-related vacancies only. The search 
 - Duplicate removal based on title, company, and location when those values are available
 - Provider source included for each posting, currently `Adzuna` or `Jooble`
 - Partial provider failure handling: successful provider results are still returned with warnings
-- Up to 250 results fetched per search (5 pages × 50 results)
-- Clean web UI with results rendered in a sortable table
+- Up to 250 results fetched per provider per search (5 pages × 50 results)
+- Clean web UI with results rendered as job cards
 - Automatic browser launch on server start
 
 ## How It Works
@@ -28,7 +28,7 @@ The current product mode returns IT and tech-related vacancies only. The search 
 5. `JobSearchService` queries each provider independently, keeps successful results when another provider fails, and records safe warnings for the API response.
 6. The service identifies seniority and remote/hybrid/onsite work type, derives tags, keeps only postings matching the current IT/tech scope, filters position searches against title, description, and category, then sorts by relevance using role text, optional preferences, and an exact-city location bonus.
 7. Duplicate detection removes repeated postings with the same title, company, and location after sorting, retaining the highest-ranked occurrence.
-8. Jackson serializes response objects to JSON; the UI renders jobs as a table and displays any provider warnings in the status area.
+8. Jackson serializes response objects to JSON; the UI renders jobs as cards and displays any provider warnings in the status area.
 
 ## Architecture
 
@@ -43,7 +43,7 @@ src/main/java/
 │   ├── JobSearchService.java — search business logic
 │   ├── JobSearchOutcome.java — service result containing jobs plus provider warnings
 │   ├── JobSearchCriteria.java — optional position/category/seniority/work-type/tag filters
-│   ├── JobSortOption.java — supported result ordering modes, currently relevance
+│   ├── JobSortOption.java — supported result ordering modes: relevance, newest, salary, and company
 │   ├── JobRelevanceScorer.java — calculates relevance score for result ordering
 │   ├── JobDuplicateDetector.java — removes repeated title/company/location results
 │   ├── JobSeniorityClassifier.java — derives internship/junior/mid/senior/lead level
@@ -112,7 +112,7 @@ The server starts at `http://localhost:8080` by default and opens in your defaul
 ## Search API
 
 ```
-GET /search?location={city}&position={job_title_or_keyword}&category={category}&seniority={level}&preferredSeniority={level}&workType={type}&preferredWorkType={type}&preferredEmploymentType={type}&preferredEmploymentSchedule={schedule}&tag={tag}&sort={mode}
+GET /search?location={city}&position={job_title_or_keyword}&category={category}&seniority={level}&preferredSeniority={level}&workType={type}&preferredWorkType={type}&preferredEmploymentType={type}&preferredEmploymentSchedule={schedule}&tag={tag}&minimumSalary={amount_or_available}&postedWithinDays={days}&sort={mode}
 ```
 
 | Parameter  | Description                          | Example       |
@@ -127,11 +127,13 @@ GET /search?location={city}&position={job_title_or_keyword}&category={category}&
 | `preferredEmploymentType` | Optional contract type preference from provider data: `permanent` or `contract` | `contract` |
 | `preferredEmploymentSchedule` | Optional schedule preference from provider data: `full-time` or `part-time` | `full-time` |
 | `tag` | Optional derived characteristic, currently values such as `tech`, seniority, or work type | `remote` |
-| `sort` | Optional result order; currently supports `relevance` and defaults to it | `relevance` |
+| `minimumSalary` | Optional salary filter; use `available` for postings with listed salary or a number for minimum salary | `100000` |
+| `postedWithinDays` | Optional freshness filter in days | `7` |
+| `sort` | Optional result order: `relevance`, `newest`, `salary`, or `company`; defaults to `relevance` | `newest` |
 
 The current version returns only postings identified as IT or tech-related. Omitting `position` queries Adzuna's broad IT category and Jooble's broad IT/tech keyword query in the selected location instead of silently forcing one particular role such as Java Developer. Searches for specific roles such as QA or Data Engineer still use their role keywords.
 
-The current web form sends `location` and `position`; results are still sorted by relevance because that is the default mode. The additional API filters and explicit `sort=relevance` parameter are available in the backend now and can be exposed as frontend controls in a later UI stage.
+The current web form sends `location`, `position`, `sort`, `workType`, `seniority`, `minimumSalary`, and `postedWithinDays`. Additional backend-only parameters such as `category`, `tag`, `preferredSeniority`, `preferredWorkType`, `preferredEmploymentType`, and `preferredEmploymentSchedule` are available through the API.
 
 Returns a standard JSON response object:
 
@@ -146,7 +148,8 @@ Returns a standard JSON response object:
       "location": "Dallas",
       "url": "https://...",
       "website": "adzuna.com",
-      "source": "Adzuna"
+      "source": "Adzuna",
+      "salary": "$100,000 - $130,000"
     }
   ],
   "warnings": []
@@ -168,7 +171,8 @@ If one provider is temporarily unavailable, the response remains successful when
       "location": "Dallas",
       "url": "https://...",
       "website": "adzuna.com",
-      "source": "Adzuna"
+      "source": "Adzuna",
+      "salary": "$100,000 - $130,000"
     }
   ],
   "warnings": [

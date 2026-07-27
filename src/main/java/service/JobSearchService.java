@@ -33,7 +33,6 @@ public class JobSearchService {
         this.providers = providers;
     }
 
-    // Business logic: ask each configured provider for jobs and combine the results.
     public List<JobPosting> searchJobs(String location, String position) {
         return searchJobs(new JobSearchCriteria(location, position, "", "", "", ""));
     }

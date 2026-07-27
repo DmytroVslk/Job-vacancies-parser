@@ -152,6 +152,7 @@ public class JobSearchCriteria {
         return sortOption;
     }
 
+    //prevents null values from being stored in the fields, and trims whitespace from the beginning and end of the string
     private String clean(String value) {
         return value == null ? "" : value.trim();
     }
