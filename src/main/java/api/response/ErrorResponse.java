@@ -1,4 +1,4 @@
-package response;
+package api.response;
 
 public class ErrorResponse {
     private final boolean success;

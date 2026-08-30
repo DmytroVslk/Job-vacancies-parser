@@ -1,9 +1,9 @@
-package service;
-
-import vo.JobPosting;
+package search;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import domain.JobPosting;
 
 public class JobSearchOutcome {
 

@@ -1,6 +1,6 @@
-package response;
+package api.response;
 
-import vo.JobPosting;
+import domain.JobPosting;
 
 public class JobSearchResult {
     private final String title;

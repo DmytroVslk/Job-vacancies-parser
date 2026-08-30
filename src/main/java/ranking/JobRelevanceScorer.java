@@ -1,9 +1,10 @@
-package service;
-
-import vo.JobPosting;
+package ranking;
 
 import java.util.Locale;
 import java.util.Set;
+
+import domain.JobPosting;
+import search.JobSearchCriteria;
 
 public class JobRelevanceScorer {
 

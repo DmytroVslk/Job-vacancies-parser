@@ -1,4 +1,4 @@
-package response;
+package api.response;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,8 +1,8 @@
-package service;
+package search;
 
-import model.JobProvider;
-import model.ProviderException;
-import vo.JobPosting;
+import provider.JobProvider;
+import provider.ProviderException;
+import ranking.JobRelevanceScorer;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -14,6 +14,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import classification.JobSeniorityClassifier;
+import classification.JobTagClassifier;
+import classification.JobTechScopeClassifier;
+import classification.JobWorkTypeClassifier;
+import deduplication.JobDuplicateDetector;
+import domain.JobPosting;
 
 public class JobSearchService {
 

@@ -1,9 +1,9 @@
-package service;
-
-import vo.JobPosting;
+package classification;
 
 import java.util.Locale;
 import java.util.regex.Pattern;
+
+import domain.JobPosting;
 
 public class JobTechScopeClassifier {
 

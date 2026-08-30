@@ -1,9 +1,9 @@
-package service;
-
-import vo.JobPosting;
+package classification;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import domain.JobPosting;
 
 public class JobTagClassifier {
 

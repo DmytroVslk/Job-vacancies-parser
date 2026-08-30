@@ -1,4 +1,4 @@
-package service;
+package search;
 
 public class JobSearchCriteria {
 

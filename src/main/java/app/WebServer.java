@@ -1,21 +1,24 @@
-package main;
+package app;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpServer;
+
+import api.response.ErrorResponse;
+import api.response.JobSearchResponse;
+import api.response.JobSearchResult;
+import domain.JobPosting;
+
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
-import model.AdzunaJobProvider;
-import model.JobProvider;
-import model.JoobleJobProvider;
-import model.ProviderException;
-import response.ErrorResponse;
-import response.JobSearchResponse;
-import response.JobSearchResult;
-import service.JobSearchCriteria;
-import service.JobSearchOutcome;
-import service.JobSearchService;
-import service.JobSortOption;
-import vo.JobPosting;
+
+import provider.AdzunaJobProvider;
+import provider.JobProvider;
+import provider.JoobleJobProvider;
+import provider.ProviderException;
+import search.JobSearchCriteria;
+import search.JobSearchOutcome;
+import search.JobSearchService;
+import search.JobSortOption;
 
 import java.io.*;
 import java.net.InetSocketAddress;

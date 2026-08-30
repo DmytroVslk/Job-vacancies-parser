@@ -1,9 +1,10 @@
-package model;
+package provider;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import vo.JobPosting;
+
+import domain.JobPosting;
 
 import java.io.BufferedReader;
 import java.io.IOException;
