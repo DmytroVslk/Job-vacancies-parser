@@ -182,8 +182,8 @@ public class WebServer {
 
             try {
                 JobSearchOutcome outcome = jobSearchService.search(criteria);
-                List<JobSearchResult> jobResults = toResponse(outcome.getJobs());
-                sendJson(exchange, 200, new JobSearchResponse(jobResults, outcome.getWarnings()));
+                List<JobSearchResult> jobResults = toResponse(outcome.jobs());
+                sendJson(exchange, 200, new JobSearchResponse(jobResults, outcome.warnings()));
             } catch (ProviderException e) {
                 System.out.println("Job provider error: " + e.getMessage());
                 sendJson(exchange, 500, new ErrorResponse("Unable to fetch jobs right now. Please try again later."));

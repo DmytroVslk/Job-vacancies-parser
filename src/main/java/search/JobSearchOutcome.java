@@ -5,22 +5,11 @@ import java.util.List;
 
 import domain.JobPosting;
 
-public class JobSearchOutcome {
+public record JobSearchOutcome(List<JobPosting> jobs, List<String> warnings) {
 
-    private final List<JobPosting> jobs;
-    private final List<String> warnings;
-
-    public JobSearchOutcome(List<JobPosting> jobs, List<String> warnings) {
-        this.jobs = jobs == null ? new ArrayList<>() : jobs;
-        this.warnings = warnings == null ? new ArrayList<>() : warnings;
-    }
-
-    public List<JobPosting> getJobs() {
-        return jobs;
-    }
-
-    public List<String> getWarnings() {
-        return warnings;
+    public JobSearchOutcome {
+        jobs = jobs == null ? new ArrayList<>() : jobs;
+        warnings = warnings == null ? new ArrayList<>() : warnings;
     }
 
     public boolean hasWarnings() {

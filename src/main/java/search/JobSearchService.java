@@ -45,7 +45,7 @@ public class JobSearchService {
     }
 
     public List<JobPosting> searchJobs(JobSearchCriteria criteria) {
-        return search(criteria).getJobs();
+        return search(criteria).jobs();
     }
 
     public JobSearchOutcome search(JobSearchCriteria criteria) {
