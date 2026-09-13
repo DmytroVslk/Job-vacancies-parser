@@ -55,7 +55,7 @@ public class JobSearchService {
 
         for (JobProvider provider : providers) {
             try {
-                for (JobPosting job : provider.getJobPostings(criteria.getLocation(), criteria.getPosition())) {
+                for (JobPosting job : provider.getJobPostings(criteria.location(), criteria.position())) {
                     if (hasTitle(job)) {
                         job.setSource(provider.getSourceName());
                         job.setSeniority(seniorityClassifier.classify(job));
@@ -89,7 +89,7 @@ public class JobSearchService {
 
     private int compareJobs(JobPosting first, JobPosting second, JobSearchCriteria criteria) {
         int result;
-        switch (criteria.getSortOption()) {
+        switch (criteria.sortOption()) {
             case NEWEST:
                 result = compareDescending(parsePostedDate(first.getPostedDate()), parsePostedDate(second.getPostedDate()));
                 break;
@@ -185,13 +185,13 @@ public class JobSearchService {
     }
 
     private boolean matchesCriteria(JobPosting job, JobSearchCriteria criteria) {
-        return matchesPosition(job, criteria.getPosition())
-                && matchesPartialValue(job.getCategory(), criteria.getCategory())
-                && matchesValue(job.getSeniority(), criteria.getSeniority())
-                && matchesValue(job.getWorkType(), criteria.getWorkType())
-                && matchesTag(job, criteria.getTag())
-                && matchesMinimumSalary(job, criteria.getMinimumSalary())
-                && matchesPostedWithinDays(job, criteria.getPostedWithinDays());
+        return matchesPosition(job, criteria.position())
+                && matchesPartialValue(job.getCategory(), criteria.category())
+                && matchesValue(job.getSeniority(), criteria.seniority())
+                && matchesValue(job.getWorkType(), criteria.workType())
+                && matchesTag(job, criteria.tag())
+                && matchesMinimumSalary(job, criteria.minimumSalary())
+                && matchesPostedWithinDays(job, criteria.postedWithinDays());
     }
 
     private boolean matchesPosition(JobPosting job, String searchQuery) {

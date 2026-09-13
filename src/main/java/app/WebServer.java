@@ -170,15 +170,15 @@ public class WebServer {
             );
             System.out.println("Search request: location=" + location
                     + ", position=" + position
-                    + ", seniority=" + criteria.getSeniority()
-                    + ", preferredSeniority=" + criteria.getPreferredSeniority()
-                    + ", workType=" + criteria.getWorkType()
-                    + ", preferredWorkType=" + criteria.getPreferredWorkType()
-                    + ", preferredEmploymentType=" + criteria.getPreferredEmploymentType()
-                    + ", preferredEmploymentSchedule=" + criteria.getPreferredEmploymentSchedule()
-                    + ", minimumSalary=" + criteria.getMinimumSalary()
-                    + ", postedWithinDays=" + criteria.getPostedWithinDays()
-                    + ", sort=" + criteria.getSortOption().getApiValue());
+                    + ", seniority=" + criteria.seniority()
+                    + ", preferredSeniority=" + criteria.preferredSeniority()
+                    + ", workType=" + criteria.workType()
+                    + ", preferredWorkType=" + criteria.preferredWorkType()
+                    + ", preferredEmploymentType=" + criteria.preferredEmploymentType()
+                    + ", preferredEmploymentSchedule=" + criteria.preferredEmploymentSchedule()
+                    + ", minimumSalary=" + criteria.minimumSalary()
+                    + ", postedWithinDays=" + criteria.postedWithinDays()
+                    + ", sort=" + criteria.sortOption().getApiValue());
 
             try {
                 JobSearchOutcome outcome = jobSearchService.search(criteria);
