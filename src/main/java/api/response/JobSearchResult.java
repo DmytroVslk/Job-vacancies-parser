@@ -2,13 +2,14 @@ package api.response;
 
 import domain.JobPosting;
 
-public record JobSearchResult (String title,
-                                String company,
-                                String location,
-                                String url,
-                                String website,
-                                String source,
-                                String salary
+public record JobSearchResult (
+        String title,
+        String company,
+        String location,
+        String url,
+        String website,
+        String source,
+        String salary
 ) {
     
     public JobSearchResult {

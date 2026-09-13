@@ -33,7 +33,7 @@ public class WebServer {
 
     public static void main(String[] args) throws IOException {
         AppConfig config = AppConfig.fromEnvironment();
-        int port = config.getServerPort();
+        int port = config.serverPort();
         String serverUrl = "http://localhost:" + port;
 
         JobSearchService jobSearchService = new JobSearchService(createJobProviders(config));
@@ -59,13 +59,13 @@ public class WebServer {
     private static JobProvider[] createJobProviders(AppConfig config) {
         List<JobProvider> providers = new ArrayList<>();
         providers.add(new AdzunaJobProvider(
-                config.getAdzunaAppId(),
-                config.getAdzunaAppKey(),
-                config.getAdzunaCountry()
+                config.adzunaAppId(),
+                config.adzunaAppKey(),
+                config.adzunaCountry()
         ));
 
-        if (!config.getJoobleApiKey().isBlank()) {
-            providers.add(new JoobleJobProvider(config.getJoobleApiKey()));
+        if (!config.joobleApiKey().isBlank()) {
+            providers.add(new JoobleJobProvider(config.joobleApiKey()));
             System.out.println("Jooble provider enabled.");
         } else {
             System.out.println("Jooble provider disabled: JOOBLE_API_KEY is not set.");
@@ -178,7 +178,7 @@ public class WebServer {
                     + ", preferredEmploymentSchedule=" + criteria.preferredEmploymentSchedule()
                     + ", minimumSalary=" + criteria.minimumSalary()
                     + ", postedWithinDays=" + criteria.postedWithinDays()
-                    + ", sort=" + criteria.sortOption().getApiValue());
+                    + ", sort=" + criteria.sortOption().ApiValue());
 
             try {
                 JobSearchOutcome outcome = jobSearchService.search(criteria);

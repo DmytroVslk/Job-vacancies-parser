@@ -3,7 +3,7 @@ package api.response;
 import java.util.ArrayList;
 import java.util.List;
 
-public record JobSearchResponse (
+public record JobSearchResponse(
         boolean success,
         int count,
         List<JobSearchResult> jobs,

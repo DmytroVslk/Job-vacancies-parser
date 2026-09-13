@@ -7,7 +7,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class AppConfig {
+public record AppConfig(
+    String adzunaAppId,
+    String adzunaAppKey,
+    String joobleApiKey,
+    int serverPort,
+    String adzunaCountry
+){
 
     private static final String DOTENV_FILE = ".env";
 
@@ -20,20 +26,6 @@ public class AppConfig {
     private static final int DEFAULT_SERVER_PORT = 8080;
     private static final String DEFAULT_ADZUNA_COUNTRY = "us";
 
-    private final String adzunaAppId;
-    private final String adzunaAppKey;
-    private final String joobleApiKey;
-    private final int serverPort;
-    private final String adzunaCountry;
-
-    private AppConfig(String adzunaAppId, String adzunaAppKey, String joobleApiKey, int serverPort, String adzunaCountry) {
-        this.adzunaAppId = adzunaAppId;
-        this.adzunaAppKey = adzunaAppKey;
-        this.joobleApiKey = joobleApiKey;
-        this.serverPort = serverPort;
-        this.adzunaCountry = adzunaCountry;
-    }
-
     public static AppConfig fromEnvironment() {
         Map<String, String> dotenvValues = loadDotenv();
 
@@ -44,26 +36,6 @@ public class AppConfig {
                 readServerPort(dotenvValues),
                 readOptionalConfig(ADZUNA_COUNTRY_ENV, DEFAULT_ADZUNA_COUNTRY, dotenvValues).toLowerCase()
         );
-    }
-
-    public String getAdzunaAppId() {
-        return adzunaAppId;
-    }
-
-    public String getAdzunaAppKey() {
-        return adzunaAppKey;
-    }
-
-    public String getJoobleApiKey() {
-        return joobleApiKey;
-    }
-
-    public int getServerPort() {
-        return serverPort;
-    }
-
-    public String getAdzunaCountry() {
-        return adzunaCountry;
     }
 
     private static String readRequiredConfig(String name, Map<String, String> dotenvValues) {
