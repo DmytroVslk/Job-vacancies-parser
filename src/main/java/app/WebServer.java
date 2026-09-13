@@ -18,6 +18,7 @@ import provider.ProviderException;
 import search.JobSearchCriteria;
 import search.JobSearchOutcome;
 import search.JobSearchService;
+import search.DefaultJobSearchService;
 import search.JobSortOption;
 
 import java.io.*;
@@ -36,7 +37,7 @@ public class WebServer {
         int port = config.serverPort();
         String serverUrl = "http://localhost:" + port;
 
-        JobSearchService jobSearchService = new JobSearchService(createJobProviders(config));
+        JobSearchService jobSearchService = new DefaultJobSearchService(createJobProviders(config));
         
         // Create HTTP server
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
