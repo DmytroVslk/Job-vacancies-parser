@@ -31,9 +31,9 @@ public class JobTechScopeClassifier {
     );
 
     public boolean isTechRelated(JobPosting job) {
-        return matches(job.getTitle(), TECH_ROLE)
-                || matches(job.getCategory(), TECH_CATEGORY)
-                || matches(job.getDescription(), TECH_DESCRIPTION);
+        return matches(job.title(), TECH_ROLE)
+                || matches(job.category(), TECH_CATEGORY)
+                || matches(job.description(), TECH_DESCRIPTION);
     }
 
     private boolean matches(String value, Pattern pattern) {

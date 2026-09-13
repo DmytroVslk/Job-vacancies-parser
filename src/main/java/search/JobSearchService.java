@@ -1,9 +1,5 @@
 package search;
 
-import provider.JobProvider;
-import provider.ProviderException;
-import ranking.JobRelevanceScorer;
-
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -21,6 +17,9 @@ import classification.JobTechScopeClassifier;
 import classification.JobWorkTypeClassifier;
 import deduplication.JobDuplicateDetector;
 import domain.JobPosting;
+import provider.JobProvider;
+import provider.ProviderException;
+import ranking.JobRelevanceScorer;
 
 public class JobSearchService {
 
@@ -53,18 +52,33 @@ public class JobSearchService {
         List<String> warnings = new ArrayList<>();
         int failedProviders = 0;
 
-        for (JobProvider provider : providers) {
-            try {
-                for (JobPosting job : provider.getJobPostings(criteria.location(), criteria.position())) {
-                    if (hasTitle(job)) {
-                        job.setSource(provider.getSourceName());
-                        job.setSeniority(seniorityClassifier.classify(job));
-                        job.setWorkType(workTypeClassifier.classify(job));
-                        job.setTechRelated(techScopeClassifier.isTechRelated(job));
-                        job.setTags(tagClassifier.classify(job));
-                    }
-                    if (hasTitle(job) && job.isTechRelated() && matchesCriteria(job, criteria)) {
-                        jobs.add(job);
+        for(JobProvider provider : providers){
+            try{
+                for(JobPosting job : provider.getJobPostings(criteria.location(), criteria.position())) {
+                    if(hasTitle(job)){
+                        String seniority = seniorityClassifier.classify(job);
+                        String workType = workTypeClassifier.classify(job);
+                        boolean techRelated = techScopeClassifier.isTechRelated(job);
+                        
+                        JobPosting classifiedJob = job.withClassification(
+                                provider.getSourceName(),
+                                seniority,
+                                workType,
+                                techRelated,
+                                List.of()
+                        );
+                    
+                        JobPosting enrichedJob = classifiedJob.withClassification(
+                                provider.getSourceName(),
+                                seniority,
+                                workType,
+                                techRelated,
+                                tagClassifier.classify(classifiedJob)
+                        );
+
+                        if(enrichedJob.techRelated() && matchesCriteria(enrichedJob, criteria)) {
+                            jobs.add(enrichedJob);
+                        }
                     }
                 }
             } catch (RuntimeException e) {
@@ -74,7 +88,7 @@ public class JobSearchService {
                 System.out.println("Job provider failed: " + provider.getSourceName() + " - " + e.getMessage());
             }
         }
-
+        
         if (failedProviders == providers.length) {
             throw new ProviderException("All job providers failed.");
         }
@@ -91,13 +105,13 @@ public class JobSearchService {
         int result;
         switch (criteria.sortOption()) {
             case NEWEST:
-                result = compareDescending(parsePostedDate(first.getPostedDate()), parsePostedDate(second.getPostedDate()));
+                result = compareDescending(parsePostedDate(first.postedDate()), parsePostedDate(second.postedDate()));
                 break;
             case SALARY:
-                result = compareDescending(extractSalaryAmount(first.getSalary()), extractSalaryAmount(second.getSalary()));
+                result = compareDescending(extractSalaryAmount(first.salary()), extractSalaryAmount(second.salary()));
                 break;
             case COMPANY:
-                result = compareAscending(first.getCompanyName(), second.getCompanyName());
+                result = compareAscending(first.companyName(), second.companyName());
                 break;
             case RELEVANCE:
             default:
@@ -181,14 +195,14 @@ public class JobSearchService {
     }
 
     private boolean hasTitle(JobPosting job) {
-        return job != null && job.getTitle() != null && !job.getTitle().isBlank();
+        return job != null && job.title() != null && !job.title().isBlank();
     }
 
     private boolean matchesCriteria(JobPosting job, JobSearchCriteria criteria) {
         return matchesPosition(job, criteria.position())
-                && matchesPartialValue(job.getCategory(), criteria.category())
-                && matchesValue(job.getSeniority(), criteria.seniority())
-                && matchesValue(job.getWorkType(), criteria.workType())
+                && matchesPartialValue(job.category(), criteria.category())
+                && matchesValue(job.seniority(), criteria.seniority())
+                && matchesValue(job.workType(), criteria.workType())
                 && matchesTag(job, criteria.tag())
                 && matchesMinimumSalary(job, criteria.minimumSalary())
                 && matchesPostedWithinDays(job, criteria.postedWithinDays());
@@ -199,9 +213,9 @@ public class JobSearchService {
             return true;
         }
 
-        String searchableText = normalize(job.getTitle())
-                + " " + normalize(job.getDescription())
-                + " " + normalize(job.getCategory());
+        String searchableText = normalize(job.title())
+                + " " + normalize(job.description())
+                + " " + normalize(job.category());
 
         for (String keyword : normalize(searchQuery).split("\\s+")) {
             if (!keyword.isBlank() && !searchableText.contains(keyword)) {
@@ -223,7 +237,7 @@ public class JobSearchService {
         if (tag.isEmpty()) {
             return true;
         }
-        for (String jobTag : job.getTags()) {
+        for (String jobTag : job.tags()) {
             if (normalize(jobTag).equals(normalize(tag))) {
                 return true;
             }
@@ -236,7 +250,7 @@ public class JobSearchService {
             return true;
         }
 
-        Double salaryAmount = extractSalaryAmount(job.getSalary());
+        Double salaryAmount = extractSalaryAmount(job.salary());
         if (salaryAmount == null) {
             return false;
         }
@@ -257,7 +271,7 @@ public class JobSearchService {
             return true;
         }
 
-        Instant postedDate = parsePostedDate(job.getPostedDate());
+        Instant postedDate = parsePostedDate(job.postedDate());
         if (postedDate == null) {
             return false;
         }

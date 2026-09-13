@@ -23,13 +23,13 @@ public record JobSearchResult (String title,
 
     public static JobSearchResult from(JobPosting job) {
         return new JobSearchResult(
-                job.getTitle(),
-                job.getCompanyName(),
-                job.getCity(),
-                job.getUrl(),
-                job.getWebsiteName(),
-                job.getSource(),
-                job.getSalary()
+                job.title(),
+                job.companyName(),
+                job.city(),
+                job.url(),
+                job.websiteName(),
+                job.source(),
+                job.salary()
         );
     }
 

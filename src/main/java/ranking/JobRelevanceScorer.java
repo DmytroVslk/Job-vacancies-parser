@@ -17,13 +17,13 @@ public class JobRelevanceScorer {
             return 0;
         }
 
-        return scoreTitle(job.getTitle(), criteria.position())
-                + scoreDescription(job.getDescription(), criteria.position())
-                + scorePreference(job.getSeniority(), criteria.preferredSeniority(), 8)
-                + scorePreference(job.getWorkType(), criteria.preferredWorkType(), 8)
-                + scorePreference(job.getEmploymentType(), criteria.preferredEmploymentType(), 6)
-                + scorePreference(job.getEmploymentSchedule(), criteria.preferredEmploymentSchedule(), 6)
-                + scoreLocation(job.getCity(), criteria.location());
+        return scoreTitle(job.title(), criteria.position())
+                + scoreDescription(job.description(), criteria.position())
+                + scorePreference(job.seniority(), criteria.preferredSeniority(), 8)
+                + scorePreference(job.workType(), criteria.preferredWorkType(), 8)
+                + scorePreference(job.employmentType(), criteria.preferredEmploymentType(), 6)
+                + scorePreference(job.employmentSchedule(), criteria.preferredEmploymentSchedule(), 6)
+                + scoreLocation(job.city(), criteria.location());
     }
 
     private int scoreTitle(String title, String searchQuery) {

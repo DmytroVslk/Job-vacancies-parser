@@ -20,11 +20,11 @@ public class JobWorkTypeClassifier {
     };
 
     public String classify(JobPosting job) {
-        String titleWorkType = findMatch(job.getTitle(), TITLE_RULES);
+        String titleWorkType = findMatch(job.title(), TITLE_RULES);
         if (!titleWorkType.isEmpty()) {
             return titleWorkType;
         }
-        return findMatch(job.getDescription(), DESCRIPTION_RULES);
+        return findMatch(job.description(), DESCRIPTION_RULES);
     }
 
     private String findMatch(String text, WorkTypeRule[] rules) {

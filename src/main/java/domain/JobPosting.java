@@ -1,177 +1,71 @@
 package domain;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class JobPosting {
-
-    private String title;
-    private String city;
-    private String companyName;
-    private String websiteName;
-    private String source;
-    private String url;
-    private String salary;
-    private String postedDate;
-    private String description;
-    private String category;
-    private String seniority;
-    private String workType;
-    private String employmentType;
-    private String employmentSchedule;
-    private boolean techRelated;
-    private List<String> tags = new ArrayList<>();
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        JobPosting vacancy = (JobPosting) o;
-
-        if (title != null ? !title.equals(vacancy.title) : vacancy.title != null) return false;
-        if (city != null ? !city.equals(vacancy.city) : vacancy.city != null) return false;
-        if (companyName != null ? !companyName.equals(vacancy.companyName) : vacancy.companyName != null) return false;
-        if (websiteName != null ? !websiteName.equals(vacancy.websiteName) : vacancy.websiteName != null) return false;
-        return url != null ? url.equals(vacancy.url) : vacancy.url == null;
-
+public record JobPosting(
+        String title,
+        String city,
+        String companyName,
+        String websiteName,
+        String source,
+        String url,
+        String salary,
+        String postedDate,
+        String description,
+        String category,
+        String seniority,
+        String workType,
+        String employmentType,
+        String employmentSchedule,
+        boolean techRelated,
+        List<String> tags
+) {
+    public JobPosting {
+        title = clean(title);
+        city = clean(city);
+        companyName = clean(companyName);
+        websiteName = clean(websiteName);
+        source = clean(source);
+        url = clean(url);
+        salary = clean(salary);
+        postedDate = clean(postedDate);
+        description = clean(description);
+        category = clean(category);
+        seniority = clean(seniority);
+        workType = clean(workType);
+        employmentType = clean(employmentType);
+        employmentSchedule = clean(employmentSchedule);
+        tags = tags == null ? List.of() : List.copyOf(tags);
     }
 
-    @Override
-    public int hashCode() {
-        int result = title != null ? title.hashCode() : 0;
-        result = 31 * result + (city != null ? city.hashCode() : 0);
-        result = 31 * result + (companyName != null ? companyName.hashCode() : 0);
-        result = 31 * result + (websiteName != null ? websiteName.hashCode() : 0);
-        result = 31 * result + (url != null ? url.hashCode() : 0);
-        return result;
+    private static String clean(String value) {
+        return value == null ? "" : value.trim();
     }
 
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public String getCompanyName() {
-        return companyName;
-    }
-
-    public void setCompanyName(String companyName) {
-        this.companyName = companyName;
-    }
-
-    public String getWebsiteName() {
-        return websiteName;
-    }
-
-    public void setWebsiteName(String websiteName) {
-        this.websiteName = websiteName;
-    }
-
-    public String getSource() {
-        return source;
-    }
-
-    public void setSource(String source) {
-        this.source = source;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public String getSalary() {
-        return salary;
-    }
-
-    public void setSalary(String salary) {
-        this.salary = salary;
-    }
-
-    public String getPostedDate() {
-        return postedDate;
-    }
-
-    public void setPostedDate(String postedDate) {
-        this.postedDate = postedDate;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getCategory() {
-        return category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
-    public String getSeniority() {
-        return seniority;
-    }
-
-    public void setSeniority(String seniority) {
-        this.seniority = seniority;
-    }
-
-    public String getWorkType() {
-        return workType;
-    }
-
-    public void setWorkType(String workType) {
-        this.workType = workType;
-    }
-
-    public String getEmploymentType() {
-        return employmentType;
-    }
-
-    public void setEmploymentType(String employmentType) {
-        this.employmentType = employmentType;
-    }
-
-    public String getEmploymentSchedule() {
-        return employmentSchedule;
-    }
-
-    public void setEmploymentSchedule(String employmentSchedule) {
-        this.employmentSchedule = employmentSchedule;
-    }
-
-    public boolean isTechRelated() {
-        return techRelated;
-    }
-
-    public void setTechRelated(boolean techRelated) {
-        this.techRelated = techRelated;
-    }
-
-    public List<String> getTags() {
-        return tags;
-    }
-
-    public void setTags(List<String> tags) {
-        this.tags = tags == null ? new ArrayList<>() : new ArrayList<>(tags);
+    public JobPosting withClassification(
+            String source,
+            String seniority,
+            String workType,
+            boolean techRelated,
+            List<String> tags
+    ) {
+        return new JobPosting(
+                title,
+                city,
+                companyName,
+                websiteName,
+                source,
+                url,
+                salary,
+                postedDate,
+                description,
+                category,
+                seniority,
+                workType,
+                employmentType,
+                employmentSchedule,
+                techRelated,
+                tags
+        );
     }
 }

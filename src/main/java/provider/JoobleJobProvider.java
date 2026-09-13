@@ -1,11 +1,5 @@
 package provider;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import domain.JobPosting;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -22,6 +16,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import domain.JobPosting;
 
 public class JoobleJobProvider implements JobProvider {
 
@@ -145,21 +145,26 @@ public class JoobleJobProvider implements JobProvider {
     }
 
     private JobPosting extractJobPosting(JSONObject job) {
-        JobPosting vacancy = new JobPosting();
         String type = job.optString("type", "");
-
-        vacancy.setTitle(clean(job.optString("title", "")));
-        vacancy.setCompanyName(cleanOrDefault(job.optString("company", ""), "Unknown"));
-        vacancy.setCity(clean(job.optString("location", "")));
-        vacancy.setWebsiteName(cleanOrDefault(job.optString("source", ""), "jooble.org"));
-        vacancy.setSource(getSourceName());
-        vacancy.setUrl(clean(job.optString("link", "")));
-        vacancy.setDescription(cleanDescription(job.optString("snippet", "")));
-        vacancy.setSalary(formatSalary(job.optString("salary", "")));
-        vacancy.setPostedDate(resolvePostedDate(job));
-        vacancy.setEmploymentType(normalizeEmploymentType(type));
-        vacancy.setEmploymentSchedule(normalizeEmploymentSchedule(type));
-        return vacancy;
+        
+        return new JobPosting(
+            clean(job.optString("title", "")),
+            clean(job.optString("location", "")),
+            cleanOrDefault(job.optString("company", ""), "Unknown"),
+            cleanOrDefault(job.optString("source", ""), "jooble.org"),
+            getSourceName(),
+            clean(job.optString("link", "")),
+            formatSalary(job.optString("salary", "")),
+            resolvePostedDate(job),
+            cleanDescription(job.optString("snippet", "")),
+            "", // category
+            "", // seniority
+            "", // workType
+            normalizeEmploymentType(type),
+            normalizeEmploymentSchedule(type),
+            false,
+            List.of()
+        );
     }
 
     private String formatSalary(String salary) {

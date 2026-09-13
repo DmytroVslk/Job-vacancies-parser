@@ -10,11 +10,11 @@ public class JobTagClassifier {
     public List<String> classify(JobPosting job) {
         List<String> tags = new ArrayList<>();
 
-        if (job.isTechRelated()) {
+        if (job.techRelated()) {
             tags.add("tech");
         }
-        addIfPresent(tags, job.getSeniority());
-        addIfPresent(tags, job.getWorkType());
+        addIfPresent(tags, job.seniority());
+        addIfPresent(tags, job.workType());
 
         return tags;
     }

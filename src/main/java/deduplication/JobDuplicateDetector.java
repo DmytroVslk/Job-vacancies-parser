@@ -26,17 +26,17 @@ public class JobDuplicateDetector {
 
     private DuplicateKey createKey(JobPosting job) {
         if (job == null
-                || isMissing(job.getTitle())
-                || isMissing(job.getCompanyName())
-                || isMissing(job.getCity())
-                || "unknown".equals(normalize(job.getCompanyName()))) {
+                || isMissing(job.title())
+                || isMissing(job.companyName())
+                || isMissing(job.city())
+                || "unknown".equals(normalize(job.companyName()))) {
             return null;
         }
 
         return new DuplicateKey(
-                normalize(job.getTitle()),
-                normalize(job.getCompanyName()),
-                normalize(job.getCity())
+                normalize(job.title()),
+                normalize(job.companyName()),
+                normalize(job.city())
         );
     }
 
