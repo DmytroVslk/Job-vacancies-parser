@@ -9,12 +9,7 @@ public record JobSearchResponse(
         List<JobSearchResult> jobs,
         List<String> warnings    
 ){
-    
-    public JobSearchResponse(List<JobSearchResult> jobs) {
-        this(jobs, new ArrayList<>());
-    }
-
-    public JobSearchResponse (List<JobSearchResult> jobs, List<String> warnings){
+    public JobSearchResponse(List<JobSearchResult> jobs, List<String> warnings){
         this(    
             true,
             jobs == null ? 0 : jobs.size(),

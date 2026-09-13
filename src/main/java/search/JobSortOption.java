@@ -15,7 +15,7 @@ public enum JobSortOption {
         this.apiValue = apiValue;
     }
 
-    public String ApiValue() {
+    public String apiValue() {
         return apiValue;
     }
 

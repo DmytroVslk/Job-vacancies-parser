@@ -42,16 +42,6 @@ public class DefaultJobSearchService implements JobSearchService {
     }
 
     @Override
-    public List<JobPosting> searchJobs(String location, String position) {
-        return searchJobs(new JobSearchCriteria(location, position, "", "", "", ""));
-    }
-
-    @Override
-    public List<JobPosting> searchJobs(JobSearchCriteria criteria) {
-        return search(criteria).jobs();
-    }
-
-    @Override
     public JobSearchOutcome search(JobSearchCriteria criteria) {
         List<JobPosting> jobs = new ArrayList<>();
         List<String> warnings = new ArrayList<>();
