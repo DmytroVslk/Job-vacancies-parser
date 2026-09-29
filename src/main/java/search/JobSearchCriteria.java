@@ -15,15 +15,4 @@ public record JobSearchCriteria(
         String postedWithinDays,
         JobSortOption sortOption
 ){    
-    public JobSearchCriteria(
-        String location,
-        String position,
-        String category,
-        String seniority,
-        String workType,
-        String tag
-    ){
-        this(location, position, category, seniority, workType, tag,
-            "", "", "", "", "", "", JobSortOption.RELEVANCE);       
-    }
 }

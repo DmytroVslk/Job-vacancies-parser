@@ -179,7 +179,7 @@ public class WebServer {
                     + ", preferredEmploymentSchedule=" + criteria.preferredEmploymentSchedule()
                     + ", minimumSalary=" + criteria.minimumSalary()
                     + ", postedWithinDays=" + criteria.postedWithinDays()
-                    + ", sort=" + criteria.sortOption().ApiValue());
+                    + ", sort=" + criteria.sortOption().apiValue());
 
             try {
                 JobSearchOutcome outcome = jobSearchService.search(criteria);
