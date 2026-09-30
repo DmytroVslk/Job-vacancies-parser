@@ -49,33 +49,7 @@ public class DefaultJobSearchService implements JobSearchService {
 
         for(JobProvider provider : providers){
             try{
-                for(JobPosting job : provider.getJobPostings(criteria.location(), criteria.position())) {
-                    if(hasTitle(job)){
-                        String seniority = seniorityClassifier.classify(job);
-                        String workType = workTypeClassifier.classify(job);
-                        boolean techRelated = techScopeClassifier.isTechRelated(job);
-                        
-                        JobPosting classifiedJob = job.withClassification(
-                                provider.getSourceName(),
-                                seniority,
-                                workType,
-                                techRelated,
-                                List.of()
-                        );
-                    
-                        JobPosting enrichedJob = classifiedJob.withClassification(
-                                provider.getSourceName(),
-                                seniority,
-                                workType,
-                                techRelated,
-                                tagClassifier.classify(classifiedJob)
-                        );
-
-                        if(enrichedJob.techRelated() && matchesCriteria(enrichedJob, criteria)) {
-                            jobs.add(enrichedJob);
-                        }
-                    }
-                }
+                jobs.addAll(searchProvider(provider, criteria));
             } catch (RuntimeException e) {
                 failedProviders++;
                 String warning = provider.getSourceName() + " is temporarily unavailable. Showing results from other sources.";
@@ -92,27 +66,64 @@ public class DefaultJobSearchService implements JobSearchService {
         return new JobSearchOutcome(duplicateDetector.removeDuplicates(jobs), warnings);
     }
 
+    private List<JobPosting> searchProvider(JobProvider provider, JobSearchCriteria criteria) {
+        List<JobPosting> providerJobs = new ArrayList<>();
+
+        for(JobPosting job : provider.getJobPostings(criteria.location(), criteria.position())){
+            if(hasTitle(job)){
+                JobPosting enrichedJob = classifyJob(provider, job);
+
+                if(enrichedJob.techRelated() && matchesCriteria(enrichedJob, criteria)) {
+                    providerJobs.add(enrichedJob);
+                }
+            }
+        }
+        return providerJobs;
+    }
+
+    private JobPosting classifyJob(JobProvider provider, JobPosting job) {
+        String seniority = seniorityClassifier.classify(job);
+        String workType = workTypeClassifier.classify(job);
+        boolean techRelated = techScopeClassifier.isTechRelated(job);
+                        
+        JobPosting classifiedJob = job.withClassification(
+                provider.getSourceName(),
+                seniority,
+                workType,
+                techRelated,
+                List.of()
+        );
+
+        return classifiedJob.withClassification(
+                provider.getSourceName(),
+                seniority,
+                workType,
+                techRelated,
+                tagClassifier.classify(classifiedJob)
+        );
+    }
+
+
     private void sortJobs(List<JobPosting> jobs, JobSearchCriteria criteria) {
         jobs.sort((first, second) -> compareJobs(first, second, criteria));
     }
 
     private int compareJobs(JobPosting first, JobPosting second, JobSearchCriteria criteria) {
-        int result;
-        switch (criteria.sortOption()) {
-            case NEWEST:
-                result = compareDescending(parsePostedDate(first.postedDate()), parsePostedDate(second.postedDate()));
-                break;
-            case SALARY:
-                result = compareDescending(extractSalaryAmount(first.salary()), extractSalaryAmount(second.salary()));
-                break;
-            case COMPANY:
-                result = compareAscending(first.companyName(), second.companyName());
-                break;
-            case RELEVANCE:
-            default:
-                result = compareRelevance(first, second, criteria);
-                break;
-        }
+        int result = switch (criteria.sortOption()) {
+            case NEWEST -> compareDescending(
+                parsePostedDate(first.postedDate()),
+                parsePostedDate(second.postedDate())
+            );
+            case SALARY -> compareDescending(
+                extractSalaryAmount(first.salary()),
+                extractSalaryAmount(second.salary())
+            );
+            case COMPANY -> compareAscending(
+                first.companyName(),
+                second.companyName()
+            );
+            case RELEVANCE -> compareRelevance(first, second, criteria);
+        };
 
         if (result != 0) {
             return result;
