@@ -12,16 +12,6 @@ public record JobSearchResult (
         String salary
 ) {
     
-    public JobSearchResult {
-        title = clean(title);
-        company = clean(company);
-        location = clean(location);
-        url = clean(url);
-        website = clean(website);
-        source = clean(source);
-        salary = clean(salary);
-    }
-
     public static JobSearchResult from(JobPosting job) {
         return new JobSearchResult(
                 job.title(),

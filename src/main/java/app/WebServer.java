@@ -1,16 +1,26 @@
 package app;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.InetSocketAddress;
+import java.net.URLDecoder;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
 import api.response.ErrorResponse;
 import api.response.JobSearchResponse;
 import api.response.JobSearchResult;
 import domain.JobPosting;
-
-import com.sun.net.httpserver.HttpHandler;
-import com.sun.net.httpserver.HttpExchange;
-
 import provider.AdzunaJobProvider;
 import provider.JobProvider;
 import provider.JoobleJobProvider;
@@ -19,15 +29,6 @@ import search.JobSearchCriteria;
 import search.JobSearchOutcome;
 import search.JobSearchService;
 import search.JobSortOption;
-
-import java.io.*;
-import java.net.InetSocketAddress;
-import java.net.URLDecoder;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class WebServer {
 
@@ -168,17 +169,22 @@ public class WebServer {
                     postedWithinDays,
                     sortOption
             );
-            System.out.println("Search request: location=" + location
-                    + ", position=" + position
-                    + ", seniority=" + criteria.seniority()
-                    + ", preferredSeniority=" + criteria.preferredSeniority()
-                    + ", workType=" + criteria.workType()
-                    + ", preferredWorkType=" + criteria.preferredWorkType()
-                    + ", preferredEmploymentType=" + criteria.preferredEmploymentType()
-                    + ", preferredEmploymentSchedule=" + criteria.preferredEmploymentSchedule()
-                    + ", minimumSalary=" + criteria.minimumSalary()
-                    + ", postedWithinDays=" + criteria.postedWithinDays()
-                    + ", sort=" + criteria.sortOption().ApiValue());
+            System.out.printf( 
+                    "Search request: location=%s, position=%s, seniority=%s, preferredSeniority=%s, "
+                                    + "workType=%s, preferredWorkType=%s, preferredEmploymentType=%s, "
+                                    + "preferredEmploymentSchedule=%s, minimumSalary=%s, postedWithinDays=%s, sort=%s%n",
+                location,
+                position,
+                criteria.seniority(),
+                criteria.preferredSeniority(),
+                criteria.workType(),
+                criteria.preferredWorkType(),
+                criteria.preferredEmploymentType(),
+                criteria.preferredEmploymentSchedule(),
+                criteria.minimumSalary(),
+                criteria.postedWithinDays(),
+                criteria.sortOption().apiValue()
+            );
 
             try {
                 JobSearchOutcome outcome = jobSearchService.search(criteria);

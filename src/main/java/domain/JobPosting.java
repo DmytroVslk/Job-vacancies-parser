@@ -21,25 +21,7 @@ public record JobPosting(
         List<String> tags
 ) {
     public JobPosting {
-        title = clean(title);
-        city = clean(city);
-        companyName = clean(companyName);
-        websiteName = clean(websiteName);
-        source = clean(source);
-        url = clean(url);
-        salary = clean(salary);
-        postedDate = clean(postedDate);
-        description = clean(description);
-        category = clean(category);
-        seniority = clean(seniority);
-        workType = clean(workType);
-        employmentType = clean(employmentType);
-        employmentSchedule = clean(employmentSchedule);
         tags = tags == null ? List.of() : List.copyOf(tags);
-    }
-
-    private static String clean(String value) {
-        return value == null ? "" : value.trim();
     }
 
     public JobPosting withClassification(

@@ -137,17 +137,26 @@ public class AdzunaJobProvider implements JobProvider {
         return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 
+    private String clean(String value) {
+        return value == null ? "" : value.trim();
+    }
+
+    private String cleanOrDefault(String value, String defaultValue) {
+        String cleanedValue = clean(value);
+        return cleanedValue.isEmpty() ? defaultValue : cleanedValue;
+    }
+
     private JobPosting extractJobPosting(JSONObject job) {
-        String title = job.optString("title", "");
+        String title = clean(job.optString("title", ""));
     
         JSONObject company = job.optJSONObject("company");
         String companyName = company != null
-                ? company.optString("display_name", "Unknown")
+                ? cleanOrDefault(company.optString("display_name", ""), "Unknown")
                 : "Unknown";
 
         JSONObject categoryObj = job.optJSONObject("category");
         String category = categoryObj != null
-                ? categoryObj.optString("label", "")
+                ? clean(categoryObj.optString("label", ""))
                 : "";
 
         String city = "";
@@ -155,7 +164,7 @@ public class AdzunaJobProvider implements JobProvider {
         if(locationObj != null) {
             JSONArray displayParts = locationObj.optJSONArray("area");
             if(displayParts != null && displayParts.length() > 0){
-                city = displayParts.getString(displayParts.length() - 1);
+                city = clean(displayParts.getString(displayParts.length() - 1));
             }
             if(city.isEmpty()) {
                 city = locationObj.optString("display_name", "");
