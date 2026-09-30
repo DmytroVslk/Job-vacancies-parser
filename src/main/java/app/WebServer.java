@@ -169,22 +169,34 @@ public class WebServer {
                     postedWithinDays,
                     sortOption
             );
-            System.out.printf( 
-                    "Search request: location=%s, position=%s, seniority=%s, preferredSeniority=%s, "
-                                    + "workType=%s, preferredWorkType=%s, preferredEmploymentType=%s, "
-                                    + "preferredEmploymentSchedule=%s, minimumSalary=%s, postedWithinDays=%s, sort=%s%n",
-                location,
-                position,
-                criteria.seniority(),
-                criteria.preferredSeniority(),
-                criteria.workType(),
-                criteria.preferredWorkType(),
-                criteria.preferredEmploymentType(),
-                criteria.preferredEmploymentSchedule(),
-                criteria.minimumSalary(),
-                criteria.postedWithinDays(),
-                criteria.sortOption().apiValue()
+            String searchRequestMessage = """
+                    Search request:
+                    location=%s
+                    position=%s
+                    seniority=%s
+                    preferredSeniority=%s
+                    workType=%s
+                    preferredWorkType=%s
+                    preferredEmploymentType=%s
+                    preferredEmploymentSchedule=%s
+                    minimumSalary=%s
+                    postedWithinDays=%s
+                    sort=%s
+                    """.formatted(
+                    location,
+                    position,
+                    criteria.seniority(),
+                    criteria.preferredSeniority(),
+                    criteria.workType(),
+                    criteria.preferredWorkType(),
+                    criteria.preferredEmploymentType(),
+                    criteria.preferredEmploymentSchedule(),
+                    criteria.minimumSalary(),
+                    criteria.postedWithinDays(),
+                    criteria.sortOption().apiValue()
             );
+
+            System.out.println(searchRequestMessage);
 
             try {
                 JobSearchOutcome outcome = jobSearchService.search(criteria);
