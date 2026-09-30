@@ -23,8 +23,4 @@ public record JobSearchResult (
                 job.salary()
         );
     }
-
-    private static String clean(String value) {
-        return value == null ? "" : value;
-    }
 }
