@@ -1,9 +1,10 @@
-package service;
-
-import vo.JobPosting;
+package ranking;
 
 import java.util.Locale;
 import java.util.Set;
+
+import domain.JobPosting;
+import search.JobSearchCriteria;
 
 public class JobRelevanceScorer {
 
@@ -16,13 +17,13 @@ public class JobRelevanceScorer {
             return 0;
         }
 
-        return scoreTitle(job.getTitle(), criteria.getPosition())
-                + scoreDescription(job.getDescription(), criteria.getPosition())
-                + scorePreference(job.getSeniority(), criteria.getPreferredSeniority(), 8)
-                + scorePreference(job.getWorkType(), criteria.getPreferredWorkType(), 8)
-                + scorePreference(job.getEmploymentType(), criteria.getPreferredEmploymentType(), 6)
-                + scorePreference(job.getEmploymentSchedule(), criteria.getPreferredEmploymentSchedule(), 6)
-                + scoreLocation(job.getCity(), criteria.getLocation());
+        return scoreTitle(job.title(), criteria.position())
+                + scoreDescription(job.description(), criteria.position())
+                + scorePreference(job.seniority(), criteria.preferredSeniority(), 8)
+                + scorePreference(job.workType(), criteria.preferredWorkType(), 8)
+                + scorePreference(job.employmentType(), criteria.preferredEmploymentType(), 6)
+                + scorePreference(job.employmentSchedule(), criteria.preferredEmploymentSchedule(), 6)
+                + scoreLocation(job.city(), criteria.location());
     }
 
     private int scoreTitle(String title, String searchQuery) {

@@ -67,7 +67,7 @@ async function searchJobs() {
         
         const data = await response.json();
 
-        if (!response.ok || data.success === false) {
+        if (!response.ok) {
             throw new Error(data.message || 'Network response was not ok');
         }
 

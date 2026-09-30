@@ -1,9 +1,9 @@
-package service;
-
-import vo.JobPosting;
+package classification;
 
 import java.util.Locale;
 import java.util.regex.Pattern;
+
+import domain.JobPosting;
 
 public class JobSeniorityClassifier {
 
@@ -25,11 +25,11 @@ public class JobSeniorityClassifier {
     };
 
     public String classify(JobPosting job) {
-        String titleSeniority = findMatch(job.getTitle(), TITLE_RULES);
+        String titleSeniority = findMatch(job.title(), TITLE_RULES);
         if (!titleSeniority.isEmpty()) {
             return titleSeniority;
         }
-        return findMatch(job.getDescription(), DESCRIPTION_RULES);
+        return findMatch(job.description(), DESCRIPTION_RULES);
     }
 
     private String findMatch(String text, SeniorityRule[] rules) {

@@ -1,8 +1,8 @@
-package model;
-
-import vo.JobPosting;
+package provider;
 
 import java.util.List;
+
+import domain.JobPosting;
 
 /**
  * Adapter contract for any external job data source.

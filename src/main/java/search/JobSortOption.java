@@ -1,4 +1,4 @@
-package service;
+package search;
 
 import java.util.Locale;
 
@@ -15,7 +15,7 @@ public enum JobSortOption {
         this.apiValue = apiValue;
     }
 
-    public String getApiValue() {
+    public String apiValue() {
         return apiValue;
     }
 

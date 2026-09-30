@@ -1,16 +1,11 @@
-package model;
-
-import vo.JobPosting;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+package provider;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.URI;
 import java.net.SocketTimeoutException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -18,6 +13,12 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import domain.JobPosting;
 
 public class AdzunaJobProvider implements JobProvider {
 
@@ -136,40 +137,58 @@ public class AdzunaJobProvider implements JobProvider {
         return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 
+    private String clean(String value) {
+        return value == null ? "" : value.trim();
+    }
+
+    private String cleanOrDefault(String value, String defaultValue) {
+        String cleanedValue = clean(value);
+        return cleanedValue.isEmpty() ? defaultValue : cleanedValue;
+    }
+
     private JobPosting extractJobPosting(JSONObject job) {
-        String title = job.optString("title", "");
-
-        JobPosting vacancy = new JobPosting();
-        vacancy.setTitle(title);
-        vacancy.setWebsiteName("adzuna.com");
-        vacancy.setSource(getSourceName());
-        vacancy.setUrl(job.optString("redirect_url", ""));
-        vacancy.setDescription(job.optString("description", ""));
-        vacancy.setSalary(formatSalary(job));
-        vacancy.setPostedDate(job.optString("created", ""));
-        vacancy.setEmploymentType(normalizeContractType(job.optString("contract_type", "")));
-        vacancy.setEmploymentSchedule(normalizeContractTime(job.optString("contract_time", "")));
-
+        String title = clean(job.optString("title", ""));
+    
         JSONObject company = job.optJSONObject("company");
-        vacancy.setCompanyName(company != null ? company.optString("display_name", "Unknown") : "Unknown");
+        String companyName = company != null
+                ? cleanOrDefault(company.optString("display_name", ""), "Unknown")
+                : "Unknown";
 
-        JSONObject category = job.optJSONObject("category");
-        vacancy.setCategory(category != null ? category.optString("label", "") : "");
+        JSONObject categoryObj = job.optJSONObject("category");
+        String category = categoryObj != null
+                ? clean(categoryObj.optString("label", ""))
+                : "";
 
-        JSONObject locationObj = job.optJSONObject("location");
         String city = "";
-        if (locationObj != null) {
+        JSONObject locationObj = job.optJSONObject("location");
+        if(locationObj != null) {
             JSONArray displayParts = locationObj.optJSONArray("area");
-            if (displayParts != null && displayParts.length() > 0) {
-                city = displayParts.getString(displayParts.length() - 1);
+            if(displayParts != null && displayParts.length() > 0){
+                city = clean(displayParts.getString(displayParts.length() - 1));
             }
-            if (city.isEmpty()) {
+            if(city.isEmpty()) {
                 city = locationObj.optString("display_name", "");
             }
         }
-        vacancy.setCity(city);
 
-        return vacancy;
+        return new JobPosting(
+            title,
+            city,
+            companyName,
+            "adzuna.com",
+            getSourceName(),
+            job.optString("redirect_url", ""),
+            formatSalary(job),
+            job.optString("created", ""),
+            job.optString("description", ""),
+            category,
+            "", // seniority
+            "", // workType
+            normalizeContractType(job.optString("contract_type", "")),
+            normalizeContractTime(job.optString("contract_time", "")),
+            false,
+            List.of()
+        );
     }
 
     private String formatSalary(JSONObject job) {

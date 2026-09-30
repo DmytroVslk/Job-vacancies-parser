@@ -1,23 +1,9 @@
-package main;
+package app;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sun.net.httpserver.HttpServer;
-import com.sun.net.httpserver.HttpHandler;
-import com.sun.net.httpserver.HttpExchange;
-import model.AdzunaJobProvider;
-import model.JobProvider;
-import model.JoobleJobProvider;
-import model.ProviderException;
-import response.ErrorResponse;
-import response.JobSearchResponse;
-import response.JobSearchResult;
-import service.JobSearchCriteria;
-import service.JobSearchOutcome;
-import service.JobSearchService;
-import service.JobSortOption;
-import vo.JobPosting;
-
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.URLDecoder;
 import java.nio.file.Files;
@@ -26,11 +12,29 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpServer;
+
+import api.response.ErrorResponse;
+import api.response.JobSearchResponse;
+import api.response.JobSearchResult;
+import domain.JobPosting;
+import provider.AdzunaJobProvider;
+import provider.JobProvider;
+import provider.JoobleJobProvider;
+import provider.ProviderException;
+import search.JobSearchCriteria;
+import search.JobSearchOutcome;
+import search.JobSearchService;
+import search.JobSortOption;
+
 public class WebServer {
 
     public static void main(String[] args) throws IOException {
         AppConfig config = AppConfig.fromEnvironment();
-        int port = config.getServerPort();
+        int port = config.serverPort();
         String serverUrl = "http://localhost:" + port;
 
         JobSearchService jobSearchService = new JobSearchService(createJobProviders(config));
@@ -56,13 +60,13 @@ public class WebServer {
     private static JobProvider[] createJobProviders(AppConfig config) {
         List<JobProvider> providers = new ArrayList<>();
         providers.add(new AdzunaJobProvider(
-                config.getAdzunaAppId(),
-                config.getAdzunaAppKey(),
-                config.getAdzunaCountry()
+                config.adzunaAppId(),
+                config.adzunaAppKey(),
+                config.adzunaCountry()
         ));
 
-        if (!config.getJoobleApiKey().isBlank()) {
-            providers.add(new JoobleJobProvider(config.getJoobleApiKey()));
+        if (!config.joobleApiKey().isBlank()) {
+            providers.add(new JoobleJobProvider(config.joobleApiKey()));
             System.out.println("Jooble provider enabled.");
         } else {
             System.out.println("Jooble provider disabled: JOOBLE_API_KEY is not set.");
@@ -165,22 +169,39 @@ public class WebServer {
                     postedWithinDays,
                     sortOption
             );
-            System.out.println("Search request: location=" + location
-                    + ", position=" + position
-                    + ", seniority=" + criteria.getSeniority()
-                    + ", preferredSeniority=" + criteria.getPreferredSeniority()
-                    + ", workType=" + criteria.getWorkType()
-                    + ", preferredWorkType=" + criteria.getPreferredWorkType()
-                    + ", preferredEmploymentType=" + criteria.getPreferredEmploymentType()
-                    + ", preferredEmploymentSchedule=" + criteria.getPreferredEmploymentSchedule()
-                    + ", minimumSalary=" + criteria.getMinimumSalary()
-                    + ", postedWithinDays=" + criteria.getPostedWithinDays()
-                    + ", sort=" + criteria.getSortOption().getApiValue());
+            String searchRequestMessage = """
+                    Search request:
+                    location=%s
+                    position=%s
+                    seniority=%s
+                    preferredSeniority=%s
+                    workType=%s
+                    preferredWorkType=%s
+                    preferredEmploymentType=%s
+                    preferredEmploymentSchedule=%s
+                    minimumSalary=%s
+                    postedWithinDays=%s
+                    sort=%s
+                    """.formatted(
+                    location,
+                    position,
+                    criteria.seniority(),
+                    criteria.preferredSeniority(),
+                    criteria.workType(),
+                    criteria.preferredWorkType(),
+                    criteria.preferredEmploymentType(),
+                    criteria.preferredEmploymentSchedule(),
+                    criteria.minimumSalary(),
+                    criteria.postedWithinDays(),
+                    criteria.sortOption().apiValue()
+            );
+
+            System.out.println(searchRequestMessage);
 
             try {
                 JobSearchOutcome outcome = jobSearchService.search(criteria);
-                List<JobSearchResult> jobResults = toResponse(outcome.getJobs());
-                sendJson(exchange, 200, new JobSearchResponse(jobResults, outcome.getWarnings()));
+                List<JobSearchResult> jobResults = toResponse(outcome.jobs());
+                sendJson(exchange, 200, new JobSearchResponse(jobResults, outcome.warnings()));
             } catch (ProviderException e) {
                 System.out.println("Job provider error: " + e.getMessage());
                 sendJson(exchange, 500, new ErrorResponse("Unable to fetch jobs right now. Please try again later."));

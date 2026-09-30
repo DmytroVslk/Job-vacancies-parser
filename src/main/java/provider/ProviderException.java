@@ -1,4 +1,4 @@
-package model;
+package provider;
 
 public class ProviderException extends RuntimeException {
     public ProviderException(String message) {
